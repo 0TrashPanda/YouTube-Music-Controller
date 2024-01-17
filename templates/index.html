@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Controller</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
+</head>
+
+<body class="bg-primary">
+    <main class="mx-auto pt-4 max-w-5xl container">
+        <a href="/">
+            <h1>YouTube Music Controller</h1>
+        </a>
+        <form action="/control" method="post">
+            <button type="submit" name="action" value="play/pause">Play/Pause</button>
+            <button type="submit" name="action" value="start">Start</button>
+            <button type="submit" name="action" value="stop">Stop</button>
+            <button type="submit" name="action" value="init">init</button>
+        </form>
+        <form action="/search" method="post">
+            <input class="bg-secondary rounded-sm" name="search_query" type="text">
+            <button type="submit">search</button>
+        </form>
+        <p>{{ status }}</p>
+        <div>
+            {% for song in songs %}
+            <div class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
+                <img class="mr-4 h-[60px] w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
+                <div class="flex flex-wrap flex-col">
+                    <p class="mb-1" >{{ song.song_title }}</p>
+                    <div class="basis-1 flex text-[#b4b4b4] text-">
+                        <p>{{ song.artist }}</p>
+                        <span class="whitespace-pre"> • </span>
+                        <p>{{ song.album }}</p>
+                        <span class="whitespace-pre"> • </span>
+                        <p>{{ song.song_length }}</p>
+                    </div>
+                </div>
+                <form class="ml-auto flex" action="/song_controll" method="post">
+                    <input type="hidden" name="index" value="{{ song.index }}">
+                    <input type="hidden" name="link" value="{{ song.link }}">
+                    <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="radio">
+                        <img src="{{ url_for('static',filename='images/radio.png') }}" class="w-6 m-2" alt="">
+                        <p class="mx-2">Start radio</p>
+                    </button>
+                    <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="add_to_queue">
+                        <img src="{{ url_for('static',filename='images/add_to_queue.png') }}" class="w-6 m-2" alt="">
+                        <p class="mx-2">Add to queue</p>
+                    </button>
+                    <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
+                        <img src="{{ url_for('static',filename='images/play_next.png') }}" class="w-6 m-2" alt="">
+                        <p class="mx-2">Play next</p>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+
+</html>
