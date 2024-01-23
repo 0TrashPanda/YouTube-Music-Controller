@@ -1,0 +1,4 @@
+flask
+selenium
+typing-extensions
+python-dotenv

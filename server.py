@@ -1,10 +1,16 @@
+import os
 import time
 from flask import Flask, render_template, request
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from dotenv import load_dotenv
 from classes import Song
+
+load_dotenv()
+
+FIREFOX_PROFILE = os.getenv('FIREFOX_PROFILE')
 
 app = Flask(__name__)
 
@@ -14,7 +20,8 @@ song_elements = None
 def start_selenium():
     global driver
     options = webdriver.FirefoxOptions()
-    options.profile = "C:/Users/jonah/AppData/Roaming/Mozilla/Firefox/Profiles/sgq6n3ov.YouTube Music"
+    if FIREFOX_PROFILE is not None:
+        options.profile = FIREFOX_PROFILE
     driver = webdriver.Firefox(options=options)
     driver.implicitly_wait(5)
     driver.get('https://music.youtube.com/')

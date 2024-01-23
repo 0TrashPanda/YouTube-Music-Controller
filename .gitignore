@@ -3,3 +3,5 @@
 /test.html
 /test.js
 /__pycache__
+/venv
+.env
