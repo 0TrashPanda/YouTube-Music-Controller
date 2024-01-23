@@ -34,6 +34,20 @@ Install Python Dependencies
 pip install -r requirements.txt
 ```
 
+Create a `.env` file:
+
+- Powershell:
+
+    ```shell
+    echo "FIREFOX_PROFILE="| Out-File -FilePath .env -Encoding ascii
+    ```
+
+- Bash:
+
+    ```sh
+    echo "FIREFOX_PROFILE=" > .env
+    ```
+
 ## Usage
 
 Start Tailwind CSS watcher
