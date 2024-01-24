@@ -1,0 +1,27 @@
+<div id="player-bar" class="fixed bottom-0 left-0 flex justify-between w-full bg-[#212121]">
+    <div id="left-controls" class="flex items-center basis-64">
+        <div class="mx-4 w-32 flex justify-between">
+            <button><img src="{{ url_for('static',filename='images/next.png') }}" class="w-5 m-2 scale-x-[-1]" alt=""></button>
+            <button hx-post="/play_pause" hx-target="#status"><img src="{{ url_for('static',filename='images/play.png') }}" class="w-5 m-2" alt=""></button>
+            <button><img src="{{ url_for('static',filename='images/next.png') }}" class="w-5 m-2" alt=""></button>
+        </div>
+        <span>{{ current_time }} / {{ total_time }}</span>
+    </div>
+    <div class="p-2 h-20 flex items-center">
+        <img class="mr-4 h-[60px] w-[60px]" src="{{ thumbnail }}" alt="{{ title }}">
+        <div class="flex flex-wrap flex-col">
+            <p class="mb-1" >{{ title }}</p>
+            <div class="basis-1 flex text-[#b4b4b4] text-">
+                <p>{{ artist }}</p>
+                <span class="whitespace-pre"> • </span>
+                <p>{{ album }}</p>
+                <span class="whitespace-pre"> • </span>
+                <p>{{ year }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="mr-4 flex items-center justify-end basis-64">
+        <button class="mr-4">vol-</button>
+        <button class="mr-4">vol+</button>
+    </div>
+</div>
