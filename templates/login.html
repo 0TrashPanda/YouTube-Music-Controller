@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Controller</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
+</head>
+
+<body class="bg-primary">
+    <h1 class="text-2xl text-center text-white">YouTube Music Controller</h1>
+    <main class="mx-auto pt-4 max-w-5xl container">
+        <div class="flex flex-col justify-center mt-5">
+            {% for user in users %}
+                <div hx-post="/login/{{ user['id']}}" hx-indicator="#loading_{{ user['id'] }}" hx-trigger="click" hx-target="body" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
+                    <img class="mr-4 h-[60px] w-[60px]" src="{{ url_for('static',filename='images/profilepics/' + user['profile_pic']) }}" alt="{{ user['profile_pic'] }}">
+                    <div class="flex flex-wrap flex-col">
+                        <p class="mb-1 overflow-hidden text-nowrap text-ellipsis" >{{ user['username'] }}</p>
+                    </div>
+                    <svg id="loading_{{ user['id'] }}" class="ml-6 htmx-indicator" width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_0XTQ{transform-origin:center;animation:spinner_y6GP .75s linear infinite;fill:mediumpurple}@keyframes spinner_y6GP{100%{transform:rotate(360deg)}}</style><path class="spinner_0XTQ" d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"/></svg>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

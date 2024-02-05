@@ -10,21 +10,23 @@
 </head>
 
 <body class="bg-primary">
+    <nav class="flex">
+        <h1 class="my-auto w-screen text-base md:text-2xl text-center text-white">YouTube Music Controller</h1>
+        <img hx-post="logout" hx-target="body" hx-indicator="#loading" hx-trigger="click" class="h-12 w-12 md:h-[60px] md:w-[60px] rounded-bl-xl" src="{{ url_for('static',filename='images/profilepics/' + user['profile_pic']) }}" alt="{{ user['profile_pic'] }}">
+    </nav>
     <main class="mx-auto pt-4 max-w-5xl container">
-        <a href="/">
-            <h1>YouTube Music Controller</h1>
-        </a>
-        <form action="/control" method="post">
-            <button type="submit" name="action" value="start">Start</button>
-            <button type="submit" name="action" value="stop">Stop</button>
-        </form>
         <button hx-get="/init" hx-target="#song-container">init</button>
+        <button hx-get="/get_queue" hx-target="#queue">get_queue</button>
         <button hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button>
         <input hx-post="/search" hx-target="#song-container" class="bg-secondary rounded-sm" name="search_query" type="text">
         <p id="status">{{ status }}</p>
-        <div id="song-container"></div>
+        <div class="flex">
+            <div id="song-container"></div>
+            <div id="queue"></div>
+        </div>
         <div id="player-bar"></div>
     </main>
+    <svg class="htmx-indicator" id="loading" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin="0"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".8" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin="0.05"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".6" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".1"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".4" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".15"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".2" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".2"></animate></circle></svg>
 </body>
 
 </html>

@@ -1,0 +1,16 @@
+{
+    "users": [
+        {
+            "id": "1",
+            "username": "Jonah",
+            "firefox_profile": "C:\\Users\\jonah\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\dwcb0lkx.Youtube Music",
+            "profile_pic": "jonah.jpg"
+        },
+        {
+            "id": "2",
+            "username": "0TrashPanda",
+            "firefox_profile": "C:\\Users\\jonah\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\dwcb0lkx.Youtube Music",
+            "profile_pic": "0trashpanda.jpg"
+        }
+    ]
+}

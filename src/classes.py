@@ -20,6 +20,8 @@ class Song:
         self.song_title = song_title
         self.song_link = song_link
         self.artist = artist
+        if album == "":
+            album = "Unknown"
         self.album = album
         if song_length == "":
             song_length = "0:00"
@@ -36,3 +38,12 @@ class Song:
         else:
             self.song_length_minutes = int(song_length[0])
 
+@dataclass
+class Player_bar:
+    thumbnail : str
+    current_time : int
+    total_time : int
+    title : str
+    artist : str
+    album : str
+    year : str

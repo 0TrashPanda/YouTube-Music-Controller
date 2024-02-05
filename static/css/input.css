@@ -16,3 +16,14 @@ h1 {
     line-height: 1.2;
     margin-bottom: 0.5em;
 }
+
+.htmx-indicator{
+    opacity:0;
+    transition: opacity 50ms ease-in;
+}
+.htmx-request .htmx-indicator{
+    opacity:1
+}
+.htmx-request.htmx-indicator{
+    opacity:1
+}

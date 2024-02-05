@@ -1,31 +1,34 @@
 {% for song in songs %}
-    <div class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
-        <img class="mr-4 h-[60px] w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
-        <div class="flex flex-wrap flex-col">
-            <p class="mb-1" >{{ song.song_title }}</p>
+    <div class="p-2 w-screen border-b-[1px] h-16 md:h-20 flex items-center border-[rgba(255,255,255,.1)]">
+        <img class="mr-4 h-12 w-12 md:h-[60px] md:w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
+        <div class="flex flex-wrap flex-col overflow-hidden">
+            <h2 class="md:mb-1 w-[60vw] text-sm md:text-base font-semibold overflow-hidden whitespace-nowrap text-ellipsis" >{{ song.song_title }}</h2>
             <div class="basis-1 flex text-[#b4b4b4] text-">
-                <p>{{ song.artist }}</p>
-                <span class="whitespace-pre"> • </span>
-                <p>{{ song.album }}</p>
-                <span class="whitespace-pre"> • </span>
-                <p>{{ song.song_length }}</p>
+                <p class="text-xs md:text-sm max-w-[30vw] md:max-w-none overflow-hidden whitespace-nowrap text-ellipsis">{{ song.artist }}</p>
+                <span class="text-xs md:text-base whitespace-pre"> • </span>
+                <p class="hidden md:block text-sm">{{ song.album }}</p>
+                <span class="hidden md:block whitespace-pre text-sm"> • </span>
+                <p class="text-xs md:text-sm max-w-[30vw] md:max-w-none overflow-hidden whitespace-nowrap text-ellipsis">{{ song.song_length }}</p>
             </div>
         </div>
-        <form class="ml-auto flex" action="/song_controll" method="post">
-            <input type="hidden" name="index" value="{{ song.index }}">
-            <input type="hidden" name="link" value="{{ song.link }}">
-            <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="radio">
-                <img src="{{ url_for('static',filename='images/radio.png') }}" class="w-6 m-2" alt="">
+        <div class="ml-auto hidden md:flex">
+            <button hx-post="/radio/{{ song.index }}" hx-target="#player-bar" hx-swap="outerHTML" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="radio">
+                <img src="{{ url_for('static',filename='images/icons/radio.png') }}" class="w-6 m-2" alt="">
                 <p class="mx-2">Start radio</p>
             </button>
-            <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="add_to_queue">
-                <img src="{{ url_for('static',filename='images/add_to_queue.png') }}" class="w-6 m-2" alt="">
+            <button hx-post="/add_to_queue/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="add_to_queue">
+                <img src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" class="w-6 m-2" alt="">
                 <p class="mx-2">Add to queue</p>
             </button>
-            <button class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
-                <img src="{{ url_for('static',filename='images/play_next.png') }}" class="w-6 m-2" alt="">
+            <button hx-post="play_next/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
+                <img src="{{ url_for('static',filename='images/icons/play_next.png') }}" class="w-6 m-2" alt="">
                 <p class="mx-2">Play next</p>
             </button>
-        </form>
+        </div>
+        <div class="ml-auto md:hidden">
+            <button hx-post="play_next/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
+                <img src="{{ url_for('static',filename='images/icons/dots.png') }}" class="w-5 m-2" alt="">
+            </button>
+        </div>
     </div>
 {% endfor %}
