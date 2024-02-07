@@ -27,9 +27,9 @@ def init_songs():
 def index():
     global user
     print(user)
-    if user is None:
-        return render_template('login.html', users=user_data)
-    # user = [user for user in user_data if user.get('id') == '1'][0]
+    # if user is None:
+    #     return render_template('login.html', users=user_data)
+    user = [user for user in user_data if user.get('id') == '1'][0]
     return render_template('index.html', user=user)
 
 @app.route('/login/<int:user_id>', methods=['POST'])
@@ -86,6 +86,7 @@ def stop_selenium():
 @app.route('/search', methods=['POST'])
 def search():
     search_query = request.form.get('search_query')
+    print(search_query)
     if search_query == "":
         return render_template('index.html', status='search_query was empty.')
     songs = browser.search(driver, search_query)

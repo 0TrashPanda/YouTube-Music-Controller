@@ -4,29 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Music Controller</title>
+    <title>YTMC</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
 </head>
 
 <body class="bg-primary">
-    <nav class="flex">
-        <h1 class="my-auto w-screen text-base md:text-2xl text-center text-white">YouTube Music Controller</h1>
-        <img hx-post="logout" hx-target="body" hx-indicator="#loading" hx-trigger="click" class="h-12 w-12 md:h-[60px] md:w-[60px] rounded-bl-xl" src="{{ url_for('static',filename='images/profilepics/' + user['profile_pic']) }}" alt="{{ user['profile_pic'] }}">
+    <nav class="flex relative">
+        <div class="flex flex-col absolute top-0 left-0">
+            <button class="text-sm" hx-get="/init" hx-target="#song-container">init</button>
+            <button class="text-sm" hx-get="/get_queue" hx-target="#queue">get_queue</button>
+            <button class="text-sm" hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button>
+        </div>
+        <div class="mx-auto container max-w-[100rem] flex items-center">
+            <div class="w-3/5 flex justify-center">
+                <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
+                    <img hx-post="/search" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
+                    <input id="search_input" hx-post="/search" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                    <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
+                </div>
+            </div>
+            <h1 class="m-0 w-2/5 text-2xl text-center text-white">Queue</h1>
+        </div>
+        <img hx-post="logout" hx-target="body" hx-indicator="#loading" hx-trigger="click" class="absolute top-0 right-0 h-12 w-12 md:h-[60px] md:w-[60px] rounded-bl-xl" src="{{ url_for('static',filename='images/profilepics/' + user['profile_pic']) }}" alt="{{ user['profile_pic'] }}">
+        <svg id="loading" class="absolute top-0 right-0 ml-6 htmx-indicator" width="60" height="60" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_0XTQ{transform-origin:center;animation:spinner_y6GP .75s linear infinite;fill:mediumpurple}@keyframes spinner_y6GP{100%{transform:rotate(360deg)}}</style><path class="spinner_0XTQ" d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"/></svg>
     </nav>
-    <main class="mx-auto pt-4 max-w-5xl container">
-        <button hx-get="/init" hx-target="#song-container">init</button>
-        <button hx-get="/get_queue" hx-target="#queue">get_queue</button>
-        <button hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button>
-        <input hx-post="/search" hx-target="#song-container" class="bg-secondary rounded-sm" name="search_query" type="text">
-        <p id="status">{{ status }}</p>
-        <div class="flex">
-            <div id="song-container"></div>
-            <div id="queue"></div>
+    <main>
+        <div class="mx-auto pt-4 max-w-[100rem] container flex">
+            <div id="song-container" class="px-4 w-3/5">
+                
+            </div>
+            <div id="queue" class="w-2/5">
+                
+            </div>
         </div>
         <div id="player-bar"></div>
     </main>
-    <svg class="htmx-indicator" id="loading" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin="0"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".8" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin="0.05"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".6" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".1"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".4" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".15"></animate></circle><circle fill="#9E87A1" stroke="#9E87A1" stroke-width="3" opacity=".2" r="15" cx="35" cy="100"><animate attributeName="cx" calcMode="spline" dur="2.5" values="35;165;165;35;35" keySplines="0 .1 .5 1;0 .1 .5 1;0 .1 .5 1;0 .1 .5 1" repeatCount="indefinite" begin=".2"></animate></circle></svg>
+    <div>
+        <p class="block sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden bg-[red] p-4">smallest</p>
+        <p class="hidden sm:block md:hidden lg:hidden xl:hidden 2xl:hidden bg-[orange] p-4">sm</p>
+        <p class="hidden sm:hidden md:block lg:hidden xl:hidden 2xl:hidden bg-[yellow] p-4">md</p>
+        <p class="hidden sm:hidden md:hidden lg:block xl:hidden 2xl:hidden bg-[green] p-4">lg</p>
+        <p class="hidden sm:hidden md:hidden lg:hidden xl:block 2xl:hidden bg-[blue] p-4">xl</p>
+        <p class="hidden sm:hidden md:hidden lg:hidden xl:hidden 2xl:block bg-[purple] p-4">2xl</p>
+    </div>
 </body>
+
+<script type="text/javascript">
+    function clearThisID(target) {
+        document.getElementById(target).value = "";
+    }
+</script>
 
 </html>

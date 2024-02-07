@@ -1,34 +1,21 @@
 {% for song in songs %}
-    <div class="p-2 w-screen border-b-[1px] h-16 md:h-20 flex items-center border-[rgba(255,255,255,.1)]">
-        <img class="mr-4 h-12 w-12 md:h-[60px] md:w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
-        <div class="flex flex-wrap flex-col overflow-hidden">
-            <h2 class="md:mb-1 w-[60vw] text-sm md:text-base font-semibold overflow-hidden whitespace-nowrap text-ellipsis" >{{ song.song_title }}</h2>
-            <div class="basis-1 flex text-[#b4b4b4] text-">
-                <p class="text-xs md:text-sm max-w-[30vw] md:max-w-none overflow-hidden whitespace-nowrap text-ellipsis">{{ song.artist }}</p>
+    <div class="h-20 w-full flex items-center border-b-[1px] border-[rgba(255,255,255,.1)]">
+        <img class="mr-4 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px] md:w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
+        <div class="w-full md:w-[65%] lg:w-[75%] xl:w-[80%] 2xl:w-[85%] flex flex-col justify-center">
+            <h3 class="text-ellipsis whitespace-nowrap overflow-hidden ">{{ song.song_title }}</h3>
+            <div class="flex">
+                <p>{{ song.artist }}</p>
                 <span class="text-xs md:text-base whitespace-pre"> • </span>
-                <p class="hidden md:block text-sm">{{ song.album }}</p>
+                <p>{{ song.album }}</p>
                 <span class="hidden md:block whitespace-pre text-sm"> • </span>
-                <p class="text-xs md:text-sm max-w-[30vw] md:max-w-none overflow-hidden whitespace-nowrap text-ellipsis">{{ song.song_length }}</p>
+                <p>{{ song.song_length }}</p>
             </div>
         </div>
-        <div class="ml-auto hidden md:flex">
-            <button hx-post="/radio/{{ song.index }}" hx-target="#player-bar" hx-swap="outerHTML" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="radio">
-                <img src="{{ url_for('static',filename='images/icons/radio.png') }}" class="w-6 m-2" alt="">
-                <p class="mx-2">Start radio</p>
-            </button>
-            <button hx-post="/add_to_queue/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="add_to_queue">
-                <img src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" class="w-6 m-2" alt="">
-                <p class="mx-2">Add to queue</p>
-            </button>
-            <button hx-post="play_next/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
-                <img src="{{ url_for('static',filename='images/icons/play_next.png') }}" class="w-6 m-2" alt="">
-                <p class="mx-2">Play next</p>
-            </button>
-        </div>
-        <div class="ml-auto md:hidden">
-            <button hx-post="play_next/{{ song.index }}" class="flex items-center px-2 py-1 hover:underline hover:bg-secondary" type="submit" name="action" value="play_next">
-                <img src="{{ url_for('static',filename='images/icons/dots.png') }}" class="w-5 m-2" alt="">
-            </button>
+        <div class="w-16 md:w-40 ml-auto flex items-center justify-end">
+            <img hx-post="/radio/{{ song.index }}" hx-target="#player-bar" hx-swap="outerHTML" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
+            <img hx-post="/add_to_queue/{{ song.index }}" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
+            <img hx-post="/play_next/{{ song.index }}" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
+            <img onclick="" class="md:hidden w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/dots.png') }}" alt="menu">
         </div>
     </div>
 {% endfor %}

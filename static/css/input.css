@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+    min-width: 0;
+}
+
 body {
     color: #fff;
 }
@@ -18,12 +22,15 @@ h1 {
 }
 
 .htmx-indicator{
+    z-index: -1;
     opacity:0;
     transition: opacity 50ms ease-in;
 }
 .htmx-request .htmx-indicator{
+    z-index: 1;
     opacity:1
 }
 .htmx-request.htmx-indicator{
+    z-index: 1;
     opacity:1
 }
