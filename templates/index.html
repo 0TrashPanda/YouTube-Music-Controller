@@ -7,6 +7,7 @@
     <title>YTMC</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
 </head>
 
@@ -15,13 +16,13 @@
         <div class="flex flex-col absolute top-0 left-0">
             <button class="text-sm" hx-get="/init" hx-target="#song-container">init</button>
             <button class="text-sm" hx-get="/get_queue" hx-target="#queue">get_queue</button>
-            <button class="text-sm" hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button>
+            <button class="text-sm" hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button   >
         </div>
         <div class="mx-auto container max-w-[100rem] flex items-center">
             <div class="w-3/5 flex justify-center">
                 <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
                     <img hx-post="/search" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-                    <input id="search_input" hx-post="/search" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                        <input id="search_input" hx-post="/search" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
                     <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
                 </div>
             </div>
@@ -33,10 +34,10 @@
     <main>
         <div class="mx-auto pt-4 max-w-[100rem] container flex">
             <div id="song-container" class="px-4 w-3/5">
-                
+
             </div>
             <div id="queue" class="w-2/5">
-                
+
             </div>
         </div>
         <div id="player-bar"></div>
@@ -55,6 +56,29 @@
     function clearThisID(target) {
         document.getElementById(target).value = "";
     }
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        console.log('Connected to WebSocket server');
+    });
+
+    socket.on('disconnect', function() {
+        console.log('Disconnected from WebSocket server');
+    });
+
+    socket.on('innerHTML', function(data) {
+        var songContainer = document.querySelector(data.div); // Get the song container element
+        songContainer.innerHTML = data.html;
+        htmx.process(songContainer);
+    });
+
+    socket.on('outerHTML', function(data) {
+        var songContainer = document.querySelector(data.div); // Get the song container element
+        songContainer.outerHTML = data.html;
+        var songContainer = document.querySelector(data.div); // Get the song container element
+        htmx.process(songContainer);
+    });
 </script>
 
 </html>

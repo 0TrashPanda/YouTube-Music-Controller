@@ -1,4 +1,5 @@
 flask
 selenium
 typing-extensions
-python-dotenv
+flask_sockets
+flask_cors

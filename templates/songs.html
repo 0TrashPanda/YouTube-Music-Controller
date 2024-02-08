@@ -12,10 +12,10 @@
             </div>
         </div>
         <div class="w-16 md:w-40 ml-auto flex items-center justify-end">
-            <img hx-post="/radio/{{ song.index }}" hx-target="#player-bar" hx-swap="outerHTML" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
-            <img hx-post="/add_to_queue/{{ song.index }}" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
-            <img hx-post="/play_next/{{ song.index }}" class="w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
-            <img onclick="" class="md:hidden w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/dots.png') }}" alt="menu">
+            <img hx-post="/radio/{{ song.index }}" hx-target="#player-bar" hx-swap="outerHTML" class="cursor-pointer w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
+            <img hx-post="/add_to_queue/{{ song.index }}" class="cursor-pointer w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
+            <img hx-post="/play_next/{{ song.index }}" class="cursor-pointer w-6 min-w-6 m-2 hidden md:block" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
+            <img onclick="" class="cursor-pointer md:hidden w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/dots.png') }}" alt="menu">
         </div>
     </div>
 {% endfor %}

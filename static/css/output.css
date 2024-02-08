@@ -704,16 +704,16 @@ video {
   width: 8rem;
 }
 
-.w-40 {
-  width: 10rem;
-}
-
 .w-5 {
   width: 1.25rem;
 }
 
 .w-6 {
   width: 1.5rem;
+}
+
+.w-7 {
+  width: 1.75rem;
 }
 
 .w-\[60px\] {
@@ -834,19 +834,6 @@ video {
   background-color: rgb(33 33 33 / var(--tw-bg-opacity));
 }
 
-.bg-primary {
-  --tw-bg-opacity: 1;
-  background-color: rgb(26 26 26 / var(--tw-bg-opacity));
-}
-
-.bg-secondary {
-  background-color: rgba(255,255,255,.15);
-}
-
-.bg-tranparent {
-  background-color: transparent;
-}
-
 .bg-\[blue\] {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 255 / var(--tw-bg-opacity));
@@ -875,6 +862,19 @@ video {
 .bg-\[yellow\] {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 0 / var(--tw-bg-opacity));
+}
+
+.bg-primary {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 26 26 / var(--tw-bg-opacity));
+}
+
+.bg-secondary {
+  background-color: rgba(255,255,255,.15);
+}
+
+.bg-tranparent {
+  background-color: transparent;
 }
 
 .p-2 {
@@ -993,26 +993,6 @@ h1 {
   .sm\:hidden {
     display: none;
   }
-
-  .sm\:w-\[40\%\] {
-    width: 40%;
-  }
-
-  .sm\:w-\[80\%\] {
-    width: 80%;
-  }
-
-  .sm\:w-\[\%\] {
-    width: %;
-  }
-
-  .sm\:w-\[95\%\] {
-    width: 95%;
-  }
-
-  .sm\:w-full {
-    width: 100%;
-  }
 }
 
 @media (min-width: 768px) {
@@ -1040,28 +1020,16 @@ h1 {
     height: 60px;
   }
 
-  .md\:w-\[50\%\] {
-    width: 50%;
+  .md\:w-40 {
+    width: 10rem;
   }
 
   .md\:w-\[60px\] {
     width: 60px;
   }
 
-  .md\:w-\[60\%\] {
-    width: 60%;
-  }
-
   .md\:w-\[65\%\] {
     width: 65%;
-  }
-
-  .md\:w-\[70\%\] {
-    width: 70%;
-  }
-
-  .md\:w-40 {
-    width: 10rem;
   }
 
   .md\:min-w-\[60px\] {
@@ -1097,14 +1065,6 @@ h1 {
     display: none;
   }
 
-  .lg\:w-\[60\%\] {
-    width: 60%;
-  }
-
-  .lg\:w-\[70\%\] {
-    width: 70%;
-  }
-
   .lg\:w-\[75\%\] {
     width: 75%;
   }
@@ -1119,10 +1079,6 @@ h1 {
     display: none;
   }
 
-  .xl\:w-\[70\%\] {
-    width: 70%;
-  }
-
   .xl\:w-\[80\%\] {
     width: 80%;
   }
@@ -1135,18 +1091,6 @@ h1 {
 
   .\32xl\:hidden {
     display: none;
-  }
-
-  .\32xl\:w-\[75\%\] {
-    width: 75%;
-  }
-
-  .\32xl\:w-\[800\%\] {
-    width: 800%;
-  }
-
-  .\32xl\:w-\[80\%\] {
-    width: 80%;
   }
 
   .\32xl\:w-\[85\%\] {

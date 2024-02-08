@@ -2,7 +2,13 @@
     <div id="left-controls" class="flex items-center basis-64">
         <div class="mx-4 w-32 flex justify-between">
             <button hx-post="/prev"><img src="{{ url_for('static',filename='images/icons/next.png') }}" class="w-5 m-2 scale-x-[-1]" alt=""></button>
-            <button hx-post="/play_pause" hx-target="#status"><img src="{{ url_for('static',filename='images/icons/play.png') }}" class="w-5 m-2" alt=""></button>
+            <button hx-post="/play_pause">
+                {% if play_status == 'Play' %}
+                    <img src="{{ url_for('static',filename='images/icons/play.png') }}" class="w-6 m-2" alt=""></button>
+                {% endif %}
+                {% if play_status == 'Pause' %}
+                    <img src="{{ url_for('static',filename='images/icons/pause.png') }}" class="w-6 m-2" alt=""></button>
+                {% endif %}
             <button hx-post="/next"><img src="{{ url_for('static',filename='images/icons/next.png') }}" class="w-5 m-2" alt=""></button>
         </div>
         <span>{{ song.current_time }} / {{ song.total_time }}</span>

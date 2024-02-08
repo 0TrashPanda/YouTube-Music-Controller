@@ -14,6 +14,8 @@ max_songs = 15
 
 songs = []
 song_elements = []
+player_bar = None
+queue_list = []
 
 def start_selenium(FIREFOX_PROFILE):
     options = webdriver.FirefoxOptions()
@@ -22,6 +24,39 @@ def start_selenium(FIREFOX_PROFILE):
     driver = webdriver.Firefox(options=options)
     driver.get('https://music.youtube.com/')
     return driver
+
+def get_play_state(driver):
+    try:
+        play_pause_button = driver.find_element(By.ID, 'play-pause-button')
+        return play_pause_button.get_attribute('title')
+    except:
+        print('Failed to find play/pause button.')
+        return None
+
+def get_player_page_state(driver):
+    try:
+        player_page = driver.find_element(By.CSS_SELECTOR, 'tp-yt-paper-icon-button.toggle-player-page-button.style-scope.ytmusic-player-bar')
+        return player_page.get_attribute('aria-label').split(' ')[0]
+    except:
+        print('Failed to find player page.')
+        return None
+
+def toggle_player_page(driver):
+    try:
+        player_page = driver.find_element(By.CSS_SELECTOR, 'tp-yt-paper-icon-button.toggle-player-page-button.style-scope.ytmusic-player-bar')
+        player_page.click()
+    except:
+        print('Failed to find player page.')
+
+def open_player_page(driver):
+    if get_player_page_state(driver) == 'Close':
+        return
+    toggle_player_page(driver)
+
+def close_player_page(driver):
+    if get_player_page_state(driver) == 'Open':
+        return
+    toggle_player_page(driver)
 
 def controll(driver, action):
     match action:
@@ -46,18 +81,19 @@ def controll(driver, action):
         case _:
             print('Invalid action.')
 
-def player_bar(driver):
+def get_player_bar(driver):
+    global player_bar
     ytmusic_player_bar = driver.find_element(By.CSS_SELECTOR, 'ytmusic-player-bar')
     thumbnail = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'img.image.style-scope.ytmusic-player-bar').get_attribute('src')
     lengths = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'span.time-info.style-scope.ytmusic-player-bar').text.split('/')
-    print(lengths)
     current_time = song_length_to_sec(lengths[0])
     total_time = song_length_to_sec(lengths[1])
     title = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'yt-formatted-string.title.style-scope.ytmusic-player-bar').text
     artist = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'yt-formatted-string.byline.style-scope.ytmusic-player-bar.complex-string').find_element(By.XPATH, './/a[1]').text
     album = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'yt-formatted-string.byline.style-scope.ytmusic-player-bar.complex-string').find_element(By.XPATH, './/a[2]').text
     year = ytmusic_player_bar.find_element(By.CSS_SELECTOR, 'yt-formatted-string.byline.style-scope.ytmusic-player-bar.complex-string').find_element(By.XPATH, './/span[last()]').text
-    return Player_bar(thumbnail, current_time, total_time, title, artist, album, year)
+    player_bar = Player_bar(thumbnail, current_time, total_time, title, artist, album, year)
+    return player_bar
 
 def search(driver, search_query):
     try:
@@ -105,7 +141,10 @@ def search(driver, search_query):
     return songs
 
 def queue(driver):
-    queue = []
+    global queue_list
+    queue_list = []
+    open_player_page(driver)
+    time.sleep(0.1)
     queue_container = driver.find_element(By.CSS_SELECTOR, 'div#contents.style-scope.ytmusic-player-queue')
     queue_elements = queue_container.find_elements(By.CSS_SELECTOR, 'ytmusic-player-queue-item')
     for index, queue_element in enumerate(queue_elements):
@@ -114,23 +153,29 @@ def queue(driver):
             title = queue_element.find_element(By.CSS_SELECTOR, 'yt-formatted-string.song-title.style-scope.ytmusic-player-queue-item').text
             artist = queue_element.find_element(By.CSS_SELECTOR, 'yt-formatted-string.byline.style-scope.ytmusic-player-queue-item').text
             length = queue_element.find_element(By.CSS_SELECTOR, 'yt-formatted-string.duration.style-scope.ytmusic-player-queue-item').text
-            queue.append(Song(thumbnail, title, '', artist, '', length, index))
+            queue_list.append(Song(thumbnail, title, '', artist, '', length, index))
         except:
             print(f'Failed to find song {index}')
             continue
-    return queue
+    return queue_list
 
 def radio(driver, index):
+    close_player_page(driver)
+    time.sleep(0.1)
     menu = kebab_menu(driver, index)
     start_radio = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Start radio']")
     start_radio.click()
 
 def add_to_queue(driver, index):
+    close_player_page(driver)
+    time.sleep(0.1)
     menu = kebab_menu(driver, index)
     add_to_queue = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Add to queue']")
     add_to_queue.click()
 
 def play_next(driver, index):
+    close_player_page(driver)
+    time.sleep(0.1)
     menu = kebab_menu(driver, index)
     play_next = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Play next']")
     play_next.click()
