@@ -16,6 +16,7 @@ songs = []
 song_elements = []
 player_bar = None
 queue_list = []
+queue_elements = []
 
 def start_selenium(FIREFOX_PROFILE):
     options = webdriver.FirefoxOptions()
@@ -145,6 +146,7 @@ def queue(driver):
     queue_list = []
     open_player_page(driver)
     time.sleep(0.1)
+    global queue_elements
     queue_container = driver.find_element(By.CSS_SELECTOR, 'div#contents.style-scope.ytmusic-player-queue')
     queue_elements = queue_container.find_elements(By.CSS_SELECTOR, 'ytmusic-player-queue-item')
     for index, queue_element in enumerate(queue_elements):
@@ -162,33 +164,46 @@ def queue(driver):
 def radio(driver, index):
     close_player_page(driver)
     time.sleep(0.1)
-    menu = kebab_menu(driver, index)
+    menu = kebab_menu(driver, index, 'songs')
     start_radio = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Start radio']")
     start_radio.click()
 
 def add_to_queue(driver, index):
     close_player_page(driver)
     time.sleep(0.1)
-    menu = kebab_menu(driver, index)
+    menu = kebab_menu(driver, index, 'songs')
     add_to_queue = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Add to queue']")
     add_to_queue.click()
 
 def play_next(driver, index):
     close_player_page(driver)
     time.sleep(0.1)
-    menu = kebab_menu(driver, index)
+    menu = kebab_menu(driver, index, 'songs')
     play_next = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Play next']")
     play_next.click()
 
-def kebab_menu(driver, index):
-    global song_elements
-    kebab_menu = song_elements[index].find_element(By.CSS_SELECTOR, 'div.yt-spec-touch-feedback-shape.yt-spec-touch-feedback-shape--touch-response')
+def kebab_menu(driver, index, list):
+    if list == 'songs':
+        global song_elements
+        list = song_elements
+    elif list == 'queue':
+        global queue_elements
+        list = queue_elements
+    kebab_menu = list[index].find_element(By.CSS_SELECTOR, 'div.yt-spec-touch-feedback-shape.yt-spec-touch-feedback-shape--touch-response')
     center_element_vertically(driver, kebab_menu)
+    time.sleep(0.1)
     ActionChains(driver).move_to_element(kebab_menu).perform()
+    time.sleep(0.1)
     kebab_menu.click()
     wait_for_style_change(driver, 'tp-yt-iron-dropdown.style-scope.ytmusic-popup-container', 'z-index')
     return driver.find_element(By.CSS_SELECTOR, 'tp-yt-iron-dropdown.style-scope.ytmusic-popup-container')
 
+def remove_from_queue(driver, index):
+    open_player_page(driver)
+    time.sleep(0.1)
+    menu = kebab_menu(driver, index, 'queue')
+    remove_from_queue = menu.find_element(By.XPATH, "//yt-formatted-string[text()='Remove from queue']")
+    remove_from_queue.click()
 
 def wait_for_loading(driver):
     start_loading(driver)

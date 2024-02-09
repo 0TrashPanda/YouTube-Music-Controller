@@ -43,9 +43,9 @@ def handle_disconnect():
 @app.route('/')
 def index():
     global user
-    if user is None:
-        return render_template('login.html', users=user_data)
-    # user = [user for user in user_data if user.get('id') == '1'][0]
+    # if user is None:
+    #     return render_template('login.html', users=user_data)
+    user = [user for user in user_data if user.get('id') == '1'][0]
     return render_template('index.html', user=user)
 
 @app.route('/login/<int:user_id>', methods=['POST'])
@@ -59,7 +59,7 @@ def login(user_id):
     driver = browser.start_selenium(_user.get('firefox_profile'))
     global user
     user = _user
-    return render_template('index.html', user=user)
+    return render_template('index.html', user=user), {'HX-Refresh': 'true'}
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -156,7 +156,14 @@ def get_queue():
     socketio.emit('innerHTML', {'html': render_template('queue_item.html', queue=browser.queue(driver)), 'div': '#queue'})
     return '', 204
 
+@app.route('/remove_from_queue/<int:index>', methods=['POST'])
+def remove_from_queue(index):
+    browser.remove_from_queue(driver, int(index))
+    time.sleep(0.3)
+    socketio.emit('innerHTML', {'html': render_template('queue_item.html', queue=browser.queue(driver)), 'div': '#queue'})
+    return '', 204
+
 if __name__ == '__main__':
-    socketio.run(app, debug=False, port=5001)
+    socketio.run(app, debug=False, port=5001, host='0.0.0.0')
     if driver is not None:
         driver.quit()

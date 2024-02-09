@@ -1,5 +1,5 @@
 {% for song in queue %}
-<div class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
+<div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
     <img class="mr-4 h-[60px] w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
     <div class="flex flex-wrap flex-col">
         <p class="mb-1" >{{ song.song_title }}</p>
@@ -7,6 +7,7 @@
             <p>{{ song.artist }}</p>
         </div>
     </div>
+    <img hx-post="/remove_from_queue/{{ song.index }}" hx-target="#queue_item" hx-swap="delete" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/trash-can.png') }}" alt="">
     <p class="ml-auto">{{ song.song_length }}</p>
 </div>
 {% endfor %}
