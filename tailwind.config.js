@@ -6,6 +6,7 @@ module.exports = {
       'primary': '#1a1a1a',
       'secondary': 'rgba(255,255,255,.15)',
       'tranparent': 'transparent',
+      'dark': '#aaa',
     },
     fontFamily: {
       'sans': ['Roboto', 'sans-serif'],

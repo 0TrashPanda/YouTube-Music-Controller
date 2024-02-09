@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YTMC</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -12,8 +12,8 @@
 </head>
 
 <body class="bg-primary h-screen overflow-scroll snap-proximity">
-    <nav class="flex relative">
-        <div class="flex flex-col absolute top-0 left-0">
+    <nav class="inline-flex sm:flex relative">
+        <div class="hidden sm:flex flex-col absolute top-0 left-0">
             <button class="text-sm" hx-get="/init" hx-target="#song-container">init</button>
             <button class="text-sm" hx-get="/get_queue" hx-target="#queue">get_queue</button>
             <button class="text-sm" hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button   >
@@ -42,7 +42,7 @@
         </div>
         <div id="player-bar"></div>
     </main>
-    <div>
+    <div class="hidden">
         <p class="block sm:hidden md:hidden lg:hidden xl:hidden 2xl:hidden bg-[red] p-4">smallest</p>
         <p class="hidden sm:block md:hidden lg:hidden xl:hidden 2xl:hidden bg-[orange] p-4">sm</p>
         <p class="hidden sm:hidden md:block lg:hidden xl:hidden 2xl:hidden bg-[yellow] p-4">md</p>

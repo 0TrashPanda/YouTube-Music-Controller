@@ -1,13 +1,16 @@
 {% for song in queue %}
 <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
-    <img class="mr-4 h-[60px] w-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
+    <img class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="{{ song.song_thumbnail_link }}" alt="{{ song.title }}">
     <div class="flex flex-wrap flex-col">
-        <p class="mb-1" >{{ song.song_title }}</p>
-        <div class="basis-1 flex text-[#b4b4b4] text-">
-            <p>{{ song.artist }}</p>
+        <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden" >{{ song.song_title }}</p>
+        <div class="flex text-[#b4b4b4] text-">
+            <p class="text-xs text-dark">{{ song.artist }}</p>
+            <span class="text-xs text-dark md:text-base whitespace-pre"> • </span>
+            <p class="text-xs text-dark hidden sm:block">{{ song.album }}</p>
+            <span class="hidden sm:block whitespace-pre text-xs text-dark"> • </span>
+            <p class="text-xs text-dark">{{ song.song_length }}</p>
         </div>
     </div>
-    <img hx-post="/remove_from_queue/{{ song.index }}" hx-target="#queue_item" hx-swap="delete" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/trash-can.png') }}" alt="">
-    <p class="ml-auto">{{ song.song_length }}</p>
+    <img hx-post="/remove_from_queue/{{ song.index }}" hx-target="#queue_item" hx-swap="delete" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="">
 </div>
 {% endfor %}

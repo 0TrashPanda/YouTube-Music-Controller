@@ -1,5 +1,5 @@
-<div id="player-bar" class="fixed bottom-0 left-0 flex justify-between w-screen bg-[#212121]">
-    <div id="left-controls" class="flex items-center basis-64">
+<div id="player-bar" class="fixed bottom-0 left-0 flex flex-row-reverse sm:flex-row justify-between w-screen bg-[#212121]">
+    <div id="left-controls" class="flex items-center">
         <div class="mx-4 w-32 flex justify-between">
             <button hx-post="/prev"><img src="{{ url_for('static',filename='images/icons/next.png') }}" class="w-5 m-2 scale-x-[-1]" alt=""></button>
             <button hx-post="/play_pause">
@@ -11,23 +11,23 @@
                 {% endif %}
             <button hx-post="/next"><img src="{{ url_for('static',filename='images/icons/next.png') }}" class="w-5 m-2" alt=""></button>
         </div>
-        <span>{{ song.current_time }} / {{ song.total_time }}</span>
+        <span class="hidden sm:block">{{ song.current_time }} / {{ song.total_time }}</span>
     </div>
     <div class="p-2 h-20 flex items-center">
         <img class="mr-4 h-[60px] w-[60px]" src="{{ song.thumbnail }}" alt="{{ song.title }}">
         <div class="flex flex-wrap flex-col">
-            <p class="mb-1" >{{ song.title }}</p>
+            <p class="w-full mb-1 text-ellipsis whitespace-nowrap overflow-hidden">{{ song.title }}</p>
             <div class="basis-1 flex text-[#b4b4b4] text-">
                 <p>{{ song.artist }}</p>
-                <span class="whitespace-pre"> • </span>
-                <p>{{ song.album }}</p>
-                <span class="whitespace-pre"> • </span>
-                <p>{{ song.year }}</p>
+                <span class="whitespace-pre hidden sm:block"> • </span>
+                <p class="hidden sm:block">{{ song.album }}</p>
+                <span class="whitespace-pre hidden sm:block"> • </span>
+                <p class="hidden sm:block">{{ song.year }}</p>
             </div>
         </div>
     </div>
-    <div class="mr-4 flex items-center justify-end basis-64">
-        <button class="mr-4">vol-</button>
-        <button class="mr-4">vol+</button>
+    <div class="mr-4 hidden sm:flex items-center justify-end basis-64">
+        <button class="mr-4 hidden">vol-</button>
+        <button class="mr-4 hidden">vol+</button>
     </div>
 </div>

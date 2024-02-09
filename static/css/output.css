@@ -594,10 +594,6 @@ video {
   position: relative;
 }
 
-.sticky {
-  position: sticky;
-}
-
 .bottom-0 {
   bottom: 0px;
 }
@@ -640,6 +636,10 @@ video {
   margin-bottom: 0.25rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .ml-6 {
   margin-left: 1.5rem;
 }
@@ -656,12 +656,24 @@ video {
   margin-top: 1.25rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
 .block {
   display: block;
 }
 
 .flex {
   display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
 }
 
 .hidden {
@@ -692,20 +704,16 @@ video {
   height: 100vh;
 }
 
+.w-1\/2 {
+  width: 50%;
+}
+
 .w-12 {
   width: 3rem;
 }
 
 .w-16 {
   width: 4rem;
-}
-
-.w-2\/5 {
-  width: 40%;
-}
-
-.w-3\/5 {
-  width: 60%;
 }
 
 .w-32 {
@@ -720,8 +728,12 @@ video {
   width: 1.5rem;
 }
 
-.w-7 {
-  width: 1.75rem;
+.w-\[200vw\] {
+  width: 200vw;
+}
+
+.w-\[50\%\] {
+  width: 50%;
 }
 
 .w-\[60px\] {
@@ -730,26 +742,6 @@ video {
 
 .w-full {
   width: 100%;
-}
-
-.w-1 {
-  width: 0.25rem;
-}
-
-.w-1\/2 {
-  width: 50%;
-}
-
-.w-\[\] {
-  width: ;
-}
-
-.w-\[200\] {
-  width: 200;
-}
-
-.w-\[200vw\] {
-  width: 200vw;
 }
 
 .w-screen {
@@ -801,12 +793,12 @@ video {
   cursor: pointer;
 }
 
-.snap-x {
-  scroll-snap-type: x var(--tw-scroll-snap-strictness);
-}
-
 .snap-proximity {
   --tw-scroll-snap-strictness: proximity;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .flex-col {
@@ -981,6 +973,15 @@ video {
   color: rgb(180 180 180 / var(--tw-text-opacity));
 }
 
+.text-secondary {
+  color: rgba(255,255,255,.15);
+}
+
+.text-dark {
+  --tw-text-opacity: 1;
+  color: rgb(170 170 170 / var(--tw-text-opacity));
+}
+
 *{
   min-width: 0;
 }
@@ -1052,10 +1053,6 @@ h1 {
   }
 }
 
-.hover\:block:hover {
-  display: block;
-}
-
 .hover\:bg-secondary:hover {
   background-color: rgba(255,255,255,.15);
 }
@@ -1070,8 +1067,16 @@ h1 {
 }
 
 @media (min-width: 640px) {
+  .sm\:ml-0 {
+    margin-left: 0px;
+  }
+
   .sm\:block {
     display: block;
+  }
+
+  .sm\:flex {
+    display: flex;
   }
 
   .sm\:hidden {
@@ -1084,6 +1089,14 @@ h1 {
 
   .sm\:w-3\/5 {
     width: 60%;
+  }
+
+  .sm\:w-\[50\%\] {
+    width: 50%;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
   }
 
   .sm\:px-4 {
