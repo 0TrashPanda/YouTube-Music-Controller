@@ -43,9 +43,9 @@ def handle_disconnect():
 @app.route('/')
 def index():
     global user
-    # if user is None:
-    #     return render_template('login.html', users=user_data)
-    user = [user for user in user_data if user.get('id') == '1'][0]
+    if user is None:
+        return render_template('login.html', users=user_data)
+    # user = [user for user in user_data if user.get('id') == '1'][0]
     return render_template('index.html', user=user)
 
 @app.route('/login/<int:user_id>', methods=['POST'])
