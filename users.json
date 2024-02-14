@@ -3,13 +3,13 @@
         {
             "id": "1",
             "username": "Jonah",
-            "firefox_profile": "C:\\Users\\jonah\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\dwcb0lkx.Youtube Music",
+            "firefox_profile": "/home/jonah/.mozilla/firefox/m47jlqb9.default-release",
             "profile_pic": "jonah.jpg"
         },
         {
             "id": "2",
             "username": "0TrashPanda",
-            "firefox_profile": "C:\\Users\\jonah\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\dwcb0lkx.Youtube Music",
+            "firefox_profile": "/home/jonah/.mozilla/firefox/m47jlqb9.default-release",
             "profile_pic": "0trashpanda.jpg"
         }
     ]

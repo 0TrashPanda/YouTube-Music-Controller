@@ -9,6 +9,8 @@ import time
 driver = None
 user = None
 
+UI_TESTING = True
+
 with open('users.json', 'r') as file:
     data = json.load(file)
     user_data = data.get('users', [])
@@ -43,7 +45,9 @@ def handle_disconnect():
 @app.route('/')
 def index():
     global user
-    if user is None:
+    if UI_TESTING:
+        user = user_data[0]
+    elif user is None:
         return render_template('login.html', users=user_data)
     # user = [user for user in user_data if user.get('id') == '1'][0]
     return render_template('index.html', user=user)
@@ -73,6 +77,7 @@ def logout():
 
 @app.route('/init')
 def init():
+    time.sleep(3)
     browser.songs = init_songs()
     # return render_template('songs.html', songs=init_songs())
     socketio.emit('innerHTML', {'html': render_template('songs.html', songs=init_songs()), 'div': '#song-container'})
@@ -164,6 +169,6 @@ def remove_from_queue(index):
     return '', 204
 
 if __name__ == '__main__':
-    socketio.run(app, debug=False, port=5001, host='0.0.0.0')
+    socketio.run(app, debug=True, port=5001)
     if driver is not None:
         driver.quit()

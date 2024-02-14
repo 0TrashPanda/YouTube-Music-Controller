@@ -34,3 +34,18 @@ h1 {
     z-index: 1;
     opacity:1
 }
+
+.htmx-indicator-hidden{
+    z-index: -1;
+    display: none;
+    transition: opacity 50ms ease-in;
+}
+.htmx-request .htmx-indicator-hidden{
+    z-index: 1;
+    display: block;
+}
+.htmx-request.htmx-indicator-hidden{
+    z-index: 1;
+    display: block;
+}
+

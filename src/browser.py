@@ -9,6 +9,12 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from src.classes import Player_bar, Song
 from src.utils import song_length_to_sec
 
+# selenium 4
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
+
+
 timeout = 5
 max_songs = 15
 
@@ -22,7 +28,8 @@ def start_selenium(FIREFOX_PROFILE):
     options = webdriver.FirefoxOptions()
     if FIREFOX_PROFILE is not None:
         options.profile = FIREFOX_PROFILE
-    driver = webdriver.Firefox(options=options)
+    # driver = webdriver.Firefox()
+    driver = webdriver.Firefox(options=options, service=FirefoxService(GeckoDriverManager().install()))
     driver.get('https://music.youtube.com/')
     return driver
 
