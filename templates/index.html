@@ -11,20 +11,21 @@
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
 </head>
 
-<body class="bg-primary h-screen overflow-scroll snap-proximity">
+<body class="bg-primary h-screen overflow-scroll sm:overflow-auto snap-proximity">
     <nav class="inline-flex sm:flex relative">
         <div class="hidden sm:flex flex-col absolute top-0 left-0">
             <button class="text-sm" hx-get="/init" hx-target="#song-container" hx-indicator="#loading-songs">init</button>
             <button class="text-sm" hx-get="/get_queue" hx-target="#queue">get_queue</button>
             <button class="text-sm" hx-get="/player_bar" hx-target="#player-bar" hx-swap="outerHTML">get_song</button   >
         </div>
-        <div class="mx-auto sm:container w-[200vw] max-w-[100rem] overflow-scroll flex items-center">
-            <div class="w-1/2 sm:w-3/5 flex justify-center">
+        <div class="mx-auto sm:container w-[200vw] max-w-[100rem] overflow-scroll sm:overflow-auto flex items-center">
+            <div class="w-1/2 sm:w-3/5 flex justify-center relative">
                 <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
                     <img hx-post="/search" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-                        <input id="search_input" hx-post="/search" hx-target="#song-container" hx-indicator="#loading-songs" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                    <input id="search_input" hx-post="/search" hx-target="#song-container" hx-indicator="#loading-songs" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
                     <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
                 </div>
+                <img class="w-6 h-6 absolute top-1/2 right-8 -translate-y-1/2 " src="{{ url_for('static',filename='images/icons/re.png') }}" alt="re">
             </div>
             <h1 class="m-0 w-1/2 sm:w-2/5 text-2xl text-center text-white">Queue</h1>
         </div>

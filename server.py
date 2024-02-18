@@ -3,7 +3,6 @@ from src.classes import Song
 import src.browser as browser
 import json
 from flask_socketio import SocketIO
-from flask_cors import CORS
 import time
 
 driver = None
@@ -16,9 +15,7 @@ with open('users.json', 'r') as file:
     user_data = data.get('users', [])
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-CORS(app,resources={r"/*":{"origins":"*"}})
-socketio = SocketIO(app,cors_allowed_origins="*")
+socketio = SocketIO(app)
 
 def init_songs():
     songs = []

@@ -1,5 +1,6 @@
 flask
 selenium
 typing-extensions
-flask_sockets
+flask_socketio
 flask_cors
+webdriver_manager

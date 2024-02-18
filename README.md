@@ -34,19 +34,26 @@ Install Python Dependencies
 pip install -r requirements.txt
 ```
 
-Create a `.env` file:
+Create a `users.json` file:
 
-- Powershell:
-
-    ```shell
-    echo "FIREFOX_PROFILE="| Out-File -FilePath .env -Encoding ascii
-    ```
-
-- Bash:
-
-    ```sh
-    echo "FIREFOX_PROFILE=" > .env
-    ```
+```json
+{
+    "users": [
+        {
+            "id": "1",
+            "username": "Jonah",
+            "firefox_profile": "/path/to/firefox/profile",
+            "profile_pic": "jonah.jpg"
+        },
+        {
+            "id": "2",
+            "username": "example_user",
+            "firefox_profile": "/home/jonah/.mozilla/firefox/m47jlqb9.default-release",
+            "profile_pic": "0trashpanda.jpg"
+        }
+    ]
+}
+```
 
 ## Usage
 
