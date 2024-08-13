@@ -8,6 +8,7 @@
 
 body {
     color: #fff;
+    background-color: #1d1d1d;
 }
 
 a {
@@ -20,32 +21,3 @@ h1 {
     line-height: 1.2;
     margin-bottom: 0.5em;
 }
-
-.htmx-indicator{
-    z-index: -1;
-    opacity:0;
-    transition: opacity 50ms ease-in;
-}
-.htmx-request .htmx-indicator{
-    z-index: 1;
-    opacity:1
-}
-.htmx-request.htmx-indicator{
-    z-index: 1;
-    opacity:1
-}
-
-.htmx-indicator-hidden{
-    z-index: -1;
-    display: none;
-    transition: opacity 50ms ease-in;
-}
-.htmx-request .htmx-indicator-hidden{
-    z-index: 1;
-    display: block;
-}
-.htmx-request.htmx-indicator-hidden{
-    z-index: 1;
-    display: block;
-}
-

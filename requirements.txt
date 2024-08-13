@@ -1,6 +1,2 @@
 flask
-selenium
-typing-extensions
 flask_socketio
-flask_cors
-webdriver_manager

@@ -1,9 +1,4 @@
 /node_modules
-/soup.py
-/test.html
-/test.js
 /__pycache__
 /venv
-.env
 src/__pycache__/
-users.json
