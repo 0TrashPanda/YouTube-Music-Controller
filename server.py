@@ -1,41 +1,29 @@
-import yt_dlp
-import vlc
-from flask import jsonify, Flask, render_template
+from flask_socketio import SocketIO
+from flask import jsonify, Flask, render_template, request
+import socketio
+from src.classes import Player, Song
+from ytmusicapi import YTMusic
+
+ytmusic = YTMusic()
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    # socketio.emit('innerHTML', {'html': render_template('songs.html', songs=browser.songs), 'div': '#song-container'})
+    # socketio.emit('outerHTML', {'html': render_template('player_bar.html', song=browser.player_bar, play_status=browser.get_play_state(driver)), 'div': '#player-bar'})
+    # socketio.emit('innerHTML', {'html': render_template('queue_item.html', queue=browser.queue_list), 'div': '#queue'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+
+player = Player()
 
 video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
-
-def get_audio_stream_url(video_url):
-    ydl_opts = {
-        'format': 'bestaudio[ext=m4a]',  # Get the best audio only format (e.g., m4a)
-        'quiet': True,                   # Suppress output
-        'skip_download': True,           # Don't download the video
-        'noplaylist': True,              # Prevent downloading playlists
-        'extract_flat': False,            # Prevent unnecessary metadata extraction
-        'youtube_include_dash_manifest': False,  # Skip DASH manifest to avoid extra downloads
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(video_url, download=False)
-
-        # Find the audio-only format
-        audio_formats = [f for f in info_dict['formats'] if f.get('format_note') == 'Default']
-
-        if audio_formats:
-            # Get the first/best audio format URL
-            audio_url = audio_formats[0]['url']
-            print(audio_url)
-            return audio_url
-        else:
-            return None
-
-audio_url = get_audio_stream_url(video_url)
-
-instance = vlc.Instance()
-player = instance.media_player_new()
-media = instance.media_new(audio_url)
-media.get_mrl()
 
 
 @app.route('/')
@@ -44,23 +32,39 @@ def index():
 
 @app.route('/play', methods=['POST'])
 def play():
-    player.set_media(media)
-    player.play()
+    videoId = request.form.get('videoId')
+    player.new_song(f'https://music.youtube.com/watch?v={videoId}')
     return 'OK', 200
 
-@app.route('/get_time')
+@app.route('/get_time', methods=['GET'])
 def get_time():
     print(player.get_time())
     if player.get_time() == -1:
         return jsonify({'current_time': 0, 'total_time': 0})
-    current_time = player.get_time() // 1000
-    total_time = player.get_length() // 1000
-    return jsonify({'current_time': current_time, 'total_time': total_time})
+    return jsonify({'current_time': player.get_time() // 1000, 'total_time': player.get_length() // 1000})
 
 @app.route('/play_pause', methods=['POST'])
 def play_pause():
-    player.pause()
+    player.play_pause()
     return 'OK', 200
+
+@app.route('/searchr', methods=['POST'])
+def searchr():
+    search_query = request.form.get('search_query')
+    print(search_query)
+    if search_query == "":
+        return '', 204
+    # socketio.emit('innerHTML', {'html': render_template('songs.html', songs=songs), 'div': '#song-container'})
+    jsons = ytmusic.search(search_query, filter='songs', limit=5)
+    for song in jsons:
+        print(song['title'])
+        print([i['name'] for i in song['artists']])
+        print(song['album']['name'])
+        print(song['duration'])
+        print(song['thumbnails'][-1]['url'])
+        print()
+
+    return render_template('songs.html', songs=jsons)
 
 
 app.run(port=5000)

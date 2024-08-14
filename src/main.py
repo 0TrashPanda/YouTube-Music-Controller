@@ -69,31 +69,31 @@
 
 
 
-import yt_dlp
+# import yt_dlp
 
-def get_audio_stream_url(video_url):
-    ydl_opts = {
-        'format': 'bestaudio[ext=m4a]',  # Get the best audio only format (e.g., m4a)
-        'quiet': True,                   # Suppress output
-        'skip_download': True,           # Don't download the video
-        'noplaylist': True,              # Prevent downloading playlists
-        'extract_flat': False,            # Prevent unnecessary metadata extraction
-        'youtube_include_dash_manifest': False,  # Skip DASH manifest to avoid extra downloads
-    }
+# def get_audio_stream_url(video_url):
+#     ydl_opts = {
+#         'format': 'bestaudio[ext=m4a]',  # Get the best audio only format (e.g., m4a)
+#         'quiet': True,                   # Suppress output
+#         'skip_download': True,           # Don't download the video
+#         'noplaylist': True,              # Prevent downloading playlists
+#         'extract_flat': False,            # Prevent unnecessary metadata extraction
+#         'youtube_include_dash_manifest': False,  # Skip DASH manifest to avoid extra downloads
+#     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(video_url, download=False)
+#     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#         info_dict = ydl.extract_info(video_url, download=False)
 
-        # Find the audio-only format
-        audio_formats = [f for f in info_dict['formats'] if f.get('format_note') == 'Default']
+#         # Find the audio-only format
+#         audio_formats = [f for f in info_dict['formats'] if f.get('format_note') == 'Default']
 
-        if audio_formats:
-            # Get the first/best audio format URL
-            audio_url = audio_formats[0]['url']
-            print(audio_url)
-            return audio_url
-        else:
-            return None
+#         if audio_formats:
+#             # Get the first/best audio format URL
+#             audio_url = audio_formats[0]['url']
+#             print(audio_url)
+#             return audio_url
+#         else:
+#             return None
 
 # # Example usage:
 
@@ -111,45 +111,45 @@ def get_audio_stream_url(video_url):
 
 
 
-import vlc
-from flask import render_template_string, request, jsonify, Flask, render_template
+# import vlc
+# from flask import render_template_string, request, jsonify, Flask, render_template
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
-video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
-audio_url = get_audio_stream_url(video_url)
+# video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
+# audio_url = get_audio_stream_url(video_url)
 
 instance = vlc.Instance()
 player = instance.media_player_new()
 media = instance.media_new(audio_url)
 media.get_mrl()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
-@app.route('/play', methods=['POST'])
-def play():
-    player.set_media(media)
-    player.play()
-    return 'OK', 200
+# @app.route('/play', methods=['POST'])
+# def play():
+#     player.set_media(media)
+#     player.play()
+#     return 'OK', 200
 
-@app.route('/get_time')
-def get_time():
-    print('player.get_time()')
-    if player.get_time() == -1:
-        return jsonify({'current_time': 0, 'total_time': 0})
-    current_time = player.get_time() // 1000
-    total_time = player.get_length() // 1000
-    return jsonify({'current_time': current_time, 'total_time': total_time})
+# @app.route('/get_time')
+# def get_time():
+#     print('player.get_time()')
+#     if player.get_time() == -1:
+#         return jsonify({'current_time': 0, 'total_time': 0})
+#     current_time = player.get_time() // 1000
+#     total_time = player.get_length() // 1000
+#     return jsonify({'current_time': current_time, 'total_time': total_time})
 
-@app.route('/play_pause', methods=['POST'])
-def play_pause():
-    player.pause()
-    return 'OK', 200
+# @app.route('/play_pause', methods=['POST'])
+# def play_pause():
+#     player.pause()
+#     return 'OK', 200
 
 
-app.run(port=5000)
+# app.run(port=5000)
 
 # from ytmusicapi import YTMusic
 # import json
@@ -158,3 +158,23 @@ app.run(port=5000)
 
 # di = ytmusic.get_song(videoId = "fQ-UDFguLO0", signatureTimestamp = 0)
 # print(json.dumps(di, indent=2))
+
+class test:
+    d = 4
+    def __init__(self, a = 1, b = 2):
+        print("init")
+        self.a = a
+        self.b = a
+        self.c = 3
+
+    def do_e(self):
+        self.e = 5
+
+t = test(a = 5)
+print(t.a)
+print(t.d)
+print(t)
+t.do_e()
+print(t.e)
+t.j = 6
+print(t.j)
