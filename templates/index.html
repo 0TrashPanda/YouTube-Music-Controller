@@ -14,12 +14,48 @@
     <button class="text-sm" hx-get="/get_time" hx-target="p">time</button>
     <button class="text-sm" hx-post="/play_pause" hx-swap="none">play/pause</button>
     <p id="time">00:00 - 00:00</p>
-    <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
-        <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-        <input id="search_input" hx-post="/searchr" hx-target="#song-container" hx-indicator="#loading-songs" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
-        <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
-    </div>
-    <div id="song-container" class="sm:px-4 w-1/2 sm:w-3/5">
+    <div class="mx-auto pt-4 max-w-[100rem] w-[200vw] sm:container flex">
+        <div class="sm:px-4 w-1/2 sm:w-2/5">
+            <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
+                <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
+                <input id="search_input" hx-post="/searchr" hx-target="#song-container" hx-indicator="#loading-songs" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
+            </div>
+            <div id="song-container" class="">
+            </div>
+        </div>
+        <div class="w-11/12 max-w-sm text-center">
+            <!-- Song Thumbnail -->
+            <img id="song_thumbnail" src="https://via.placeholder.com/300" alt="Song Thumbnail" class="w-full rounded-lg mb-6 shadow-lg">
+
+            <!-- Song Details -->
+            <div class="mb-6">
+                <h2 id="current_song_title" class="text-xl font-bold">Song Title</h2>
+                <p id="current_song_artist" class="text-sm text-gray-400">Artist 1, Artist 2</p>
+                <p id="current_song_album" class="text-sm text-gray-400">Album Name</p>
+                <p id="current_song_year" class="text-sm text-gray-400">2024</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-between items-center mb-6">
+                <button id="prev" hx-post="/back" hx-swap="none" class="w-10 h-10">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/skip-to-start.png" alt="Previous">
+                </button>
+                <button id="playPause" hx-post="/play_pause" hx-swap="none" class="w-14 h-14">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/play.png" alt="Play">
+                </button>
+                <button id="next" hx-post="/skip" hx-swap="none" class="w-10 h-10">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/end.png" alt="Next">
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="bg-gray-700 h-2 rounded-full relative">
+                <div id="progressBar" class="bg-green-500 h-full rounded-full" style="width: 0%;"></div>
+            </div>
+        </div>
+        <div id="queue" class="sm:px-4 w-1/2 sm:w-2/5">
+        </div>
     </div>
 </body>
 <script type="text/javascript">
@@ -37,17 +73,55 @@
         console.log('Disconnected from WebSocket server');
     });
 
-    socket.on('innerHTML', function(data) {
-        var songContainer = document.querySelector(data.div); // Get the song container element
-        songContainer.innerHTML = data.html;
-        htmx.process(songContainer);
+    socket.on('update_queue', function(data) {
+        var queue = document.querySelector('#queue'); // Get the song container element
+        queue.innerHTML = "";
+        for (song of data) {
+            queue.innerHTML += createQueueItem(song);
+        }
+        htmx.process(queue);
     });
 
-    socket.on('outerHTML', function(data) {
-        var songContainer = document.querySelector(data.div); // Get the song container element
-        songContainer.outerHTML = data.html;
-        var songContainer = document.querySelector(data.div); // Get the song container element
-        htmx.process(songContainer);
+    socket.on('play_state', function(data) {
+        var play_button = document.querySelector('#playPause'); // Get the song container element
+        var play_icon = document.querySelector('#playPause img');
+        console.log(data);
+        if (data == 'Playing') {
+            play_icon.src = "{{ url_for('static',filename='images/icons/pause.png') }}"
+        } else if (data = 'Paused') {
+            play_icon.src = "{{ url_for('static',filename='images/icons/play.png') }}"
+        }
     });
+
+    socket.on('current_song', function(data) {
+        console.log(data);
+        console.log(data.thumbnail);
+        var song_thumbnail = document.querySelector('#song_thumbnail');
+        song_thumbnail.src = data.thumbnail;
+        var current_song_title = document.querySelector('#current_song_title');
+        current_song_title.innerHTML = data.title;
+        var current_song_artist = document.querySelector('#current_song_artist');
+        current_song_artist.innerHTML = data.artists;
+        var current_song_album = document.querySelector('#current_song_album');
+        current_song_album.innerHTML = data.album;
+        var current_song_year = document.querySelector('#current_song_year');
+        current_song_year.innerHTML = data.release_year;
+    });
+
+    function createQueueItem(song) {
+        return `
+        <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
+            <img class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
+            <div class="flex flex-wrap flex-col">
+                <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden">${song.title}</p>
+                <div class="flex text-[#b4b4b4]">
+                    <p class="text-xs text-dark">${song.artists}</p>
+                    <span class="text-xs text-dark whitespace-pre"> • </span>
+                    <p class="text-xs text-dark">${song.duration_string}</p>
+                </div>
+            </div>
+            <img onclick="removeFromQueue(${song.index}, this.parentElement)" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
+        </div>`;
+    }
 </script>
 </html>
