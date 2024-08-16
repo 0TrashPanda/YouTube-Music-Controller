@@ -1,29 +1,27 @@
-from dataclasses import dataclass
+import time
 import yt_dlp
 import vlc
 from ytmusicapi import YTMusic
-from flask_socketio import SocketIO
 from server import socketio
-import time
+import threading
 
 ytmusic = YTMusic()
 
 class Song:
-    def __init__(self, video_url):
+    def __init__(self, video_url, title, artists, duration, videoId, thumbnail, duration_string, album):
         self.video_url = video_url
-        data = self.get_data(video_url)
-        self.stream_url = data.get('stream_url', None)
-        self.title = data.get('title', None)
-        self.artists = data.get('artists', None)
-        self.duration = data.get('duration', None)
-        self.videoId = data.get('videoId', None)
-        self.thumbnail = data.get('thumbnail', None)
-        self.duration_string = data.get('duration_string', None)
-        self.album = data.get('album', None)
-        self.release_year = data.get('release_year', None)
+        self.title = title
+        self.album = album
+        self.artists = artists
+        self.duration = duration
+        self.videoId = videoId
+        self.thumbnail = thumbnail
+        self.release_year = None
+        self.duration_string = duration_string
+        self.stream_url = None
+        threading.Thread(target=self.gen_data, daemon=True).start() # TODO kill all threads on new radio
 
-
-    def get_data(self, video_url):
+    def gen_data(self):
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]',  # Get the best audio only format (e.g., m4a)
             'quiet': True,                   # Suppress output
@@ -34,9 +32,10 @@ class Song:
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(video_url, download=False)
+            info_dict = ydl.extract_info(self.video_url, download=False)
 
             # get the thumbnail with the highest resolution that is square
+            # todo: make this better
             thumbnails = info_dict.get('thumbnails', [{}])
             thumbnail = thumbnails[0]
             for thumb in thumbnails:
@@ -49,17 +48,16 @@ class Song:
                 break
             thumbnail_url = thumbnail.get('url', None)
 
-            return {
-                'stream_url': [f for f in info_dict['formats'] if f.get('format_note') == 'Default'][0]['url'],
-                'title': info_dict.get('title', None),
-                'thumbnail': thumbnail_url,
-                'artists': info_dict.get('artists', None),
-                'duration': info_dict.get('duration', None),
-                'videoId': info_dict.get('id', None),
-                'duration_string': info_dict.get('duration_string', None),
-                'album': info_dict.get('album', None),
-                'release_year': info_dict.get('release_year', None),
-            }
+            try:
+                stream_url = [f for f in info_dict['formats'] if f.get('format_note') == 'Default'][0]['url']
+            except IndexError:
+                print('No stream URL found')
+                print(info_dict['formats'])
+                stream_url = None
+
+            self.stream_url = stream_url
+            self.release_year = info_dict['release_year']
+            self.thumbnail = thumbnail_url
 
     def toJSON(self):
         return {
@@ -70,13 +68,17 @@ class Song:
             'videoId': self.videoId,
             'duration_string': self.duration_string,
             'album': self.album,
-            'release_year': self.release_year,\
+            'release_year': self.release_year,
             'uuid': id(self)
         }
 
     def get_id(self):
         return id(self)
 
+    def get_stream_url(self):
+        while not self.stream_url:
+            time.sleep(0.1)
+        return self.stream_url
 
 class Player:
     def __init__(self):
@@ -110,25 +112,14 @@ class Player:
         self.play_song(Song(video_url))
 
     def play_song(self, song):
-        print("Playing next song6.")
         self.current_song = song
-        print("Playing next song7." + song.stream_url)
-        if self.media is not None:
-            self.media.release()
-        self.media = self.instance.media_new(self.queue.get_current_song().stream_url)
-        print("Playing next song8.")
-
-        print(self.player.get_state())
-        self.player.set_media(self.instance.media_new(self.queue.get_current_song().stream_url))
-        print("Playing next song9.")
+        self.media = self.instance.media_new(self.queue.get_current_song().get_stream_url())
+        self.player.set_media(self.instance.media_new(self.queue.get_current_song().get_stream_url()))
         self.player.play()
 
     def play_queue(self):
-        print("Playing next song4.")
         self.queue.get_current_song()
-        print("Playing next song5.")
         self.play_song(self.queue.get_current_song())
-        print("Playing next song3.")
         socketio.emit('current_song', self.queue.get_current_song().toJSON())
 
     def get_play_state(self):
@@ -203,6 +194,15 @@ class Queue:
 
     def set_radio(self, radio):
         self.clear_queue()
-        for index, song in enumerate(radio['tracks']):
-            print(f'Adding song {index + 1} of {len(radio["tracks"])}')
-            self.add_song_at_end(Song(song['videoId']))
+        for index, song_data in enumerate(radio['tracks']):
+            videoId = song_data['videoId']
+            video_url = f'https://music.youtube.com/watch?v={videoId}'
+            artists = [artist['name'] for artist in song_data['artists']]
+            length = song_data['length']
+            duration = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
+            song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['length'], videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=duration, album=song_data.get('album', {}).get('name', ''))
+            self.add_song_at_end(song)
+            if index == 0:
+                from server import player
+                socketio.emit('update_queue', self.get_queue())
+                player.play_queue()

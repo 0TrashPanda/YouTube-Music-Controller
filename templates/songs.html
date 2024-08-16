@@ -15,8 +15,8 @@
         </div>
         <div class="w-16 md:w-40 ml-auto flex items-center justify-end">
             <img hx-post="/radio" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
-            <img hx-post="/add_to_queue" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
-            <img hx-post="/play_next" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
+            <img hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
+            <img hx-post="/play_next" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
             <!-- <img onclick="" class="cursor-pointer hidden w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/dots.png') }}" alt="menu"> -->
         </div>
     </div>

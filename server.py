@@ -1,9 +1,10 @@
 import time
 from flask_socketio import SocketIO
-from flask import jsonify, Flask, render_template, request
+from flask import jsonify, Flask, render_template, request, json
 import socketio
 from ytmusicapi import YTMusic
 import threading
+
 
 ytmusic = YTMusic()
 
@@ -68,8 +69,12 @@ def searchr():
 
 @app.route('/play_next', methods=['POST'])
 def play_next():
-    videoId = request.form.get('videoId')
-    song = Song(f'https://music.youtube.com/watch?v={videoId}')
+    song_data = request.form.get('song')
+    song_data = json.loads(song_data)
+    videoId = song_data['videoId']
+    video_url = f'https://music.youtube.com/watch?v={videoId}'
+    artists = [artist['name'] for artist in song_data['artists']]
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
     player.queue.add_song_after_current(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
@@ -78,8 +83,12 @@ def play_next():
 
 @app.route('/add_to_queue', methods=['POST'])
 def add_to_queue():
-    videoId = request.form.get('videoId')
-    song = Song(f'https://music.youtube.com/watch?v={videoId}')
+    song_data = request.form.get('song')
+    song_data = json.loads(song_data)
+    videoId = song_data['videoId']
+    video_url = f'https://music.youtube.com/watch?v={videoId}'
+    artists = [artist['name'] for artist in song_data['artists']]
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
     player.queue.add_song_at_end(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
@@ -89,10 +98,10 @@ def add_to_queue():
 @app.route('/radio', methods=['POST'])
 def radio():
     videoId = request.form.get('videoId')
-    radio = ytmusic.get_watch_playlist(videoId, radio=True, limit=5)
+    radio = ytmusic.get_watch_playlist(videoId, radio=True)
     player.queue.set_radio(radio)
-    player.play_queue()
     socketio.emit('update_queue', player.queue.get_queue())
+    return 'OK', 200
 
 @app.route('/skip', methods=['POST'])
 def skip():
