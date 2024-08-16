@@ -109,6 +109,8 @@
     });
 
     function createQueueItem(song) {
+        console.log(song);
+        console.log(song.uuid);
         return `
         <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
             <img class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
@@ -120,7 +122,8 @@
                     <p class="text-xs text-dark">${song.duration_string}</p>
                 </div>
             </div>
-            <img onclick="removeFromQueue(${song.index}, this.parentElement)" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
+            <img hx-post="/remove" hx-include="next input" hx-swap="none" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
+            <input type="hidden" name="uuid" value="${song.uuid}">
         </div>`;
     }
 </script>

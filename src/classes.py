@@ -70,8 +70,12 @@ class Song:
             'videoId': self.videoId,
             'duration_string': self.duration_string,
             'album': self.album,
-            'release_year': self.release_year,
+            'release_year': self.release_year,\
+            'uuid': id(self)
         }
+
+    def get_id(self):
+        return id(self)
 
 
 class Player:
@@ -82,6 +86,7 @@ class Player:
         self.queue = Queue()
         event_manager = self.player.event_manager()
         event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
+        self.song_end = False
 
     def get_time(self):
         return self.player.get_time()
@@ -132,17 +137,11 @@ class Player:
             return 'Paused' # reversed because broki atm
         elif state == vlc.State.Paused:
             return 'Playing'
-        elif state == vlc.State.Ended:
-            return 'Ended'
         else:
-            return 'Error'
+            return 'Ended'
 
     def on_song_end(self, event):
-        print("Song has ended.")
-        self.queue.next_song()
-        print("Playing next song2.")
-        self.play_queue()
-        print("Playing next song.")
+        self.song_end = True
 
 
 class Queue:
@@ -156,8 +155,21 @@ class Queue:
     def add_song_after_current(self, song):
         self.queue.insert(self.current_song + 1, song)
 
-    def remove_song(self, index):
+    def remove_song(self, uuid):
+        for index, song in enumerate(self.queue):
+            if str(song.get_id()) == str(uuid):
+                self.remove_song_at_index(index)
+                break
+        socketio.emit('update_queue', self.get_queue())
+
+    def remove_song_at_index(self, index):
+        if index == self.current_song:
+            self.next_song()
+            from server import player
+            player.play_queue()
         self.queue.pop(index)
+        if self.current_song > index:
+            self.current_song -= 1
 
     def get_queue(self):
         return [song.toJSON() for song in self.queue]
@@ -185,3 +197,12 @@ class Queue:
             self.current_song = len(self.queue) - 1
         else:
             self.current_song -= 1
+
+    def add_song_at_end(self, song):
+        self.queue.append(song)
+
+    def set_radio(self, radio):
+        self.clear_queue()
+        for index, song in enumerate(radio['tracks']):
+            print(f'Adding song {index + 1} of {len(radio["tracks"])}')
+            self.add_song_at_end(Song(song['videoId']))

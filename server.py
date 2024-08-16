@@ -1,7 +1,9 @@
+import time
 from flask_socketio import SocketIO
 from flask import jsonify, Flask, render_template, request
 import socketio
 from ytmusicapi import YTMusic
+import threading
 
 ytmusic = YTMusic()
 
@@ -12,7 +14,7 @@ from src.classes import Player, Song
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
-    if player.get_play_state() == 'Error':
+    if player.get_play_state() == 'Ended':
         return
     socketio.emit('play_state', player.get_play_state())
     socketio.emit('update_queue', player.queue.get_queue())
@@ -27,6 +29,13 @@ player = Player()
 
 video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
 
+def vlc_monitor():
+    while True:
+        if player.song_end:
+            player.queue.next_song()
+            player.play_queue()
+            player.song_end = False
+        time.sleep(0.2)
 
 @app.route('/')
 def index():
@@ -62,8 +71,28 @@ def play_next():
     videoId = request.form.get('videoId')
     song = Song(f'https://music.youtube.com/watch?v={videoId}')
     player.queue.add_song_after_current(song)
+    if player.get_play_state() == 'Ended':
+        player.play_queue()
     socketio.emit('update_queue', player.queue.get_queue())
     return 'OK', 200
+
+@app.route('/add_to_queue', methods=['POST'])
+def add_to_queue():
+    videoId = request.form.get('videoId')
+    song = Song(f'https://music.youtube.com/watch?v={videoId}')
+    player.queue.add_song_at_end(song)
+    if player.get_play_state() == 'Ended':
+        player.play_queue()
+    socketio.emit('update_queue', player.queue.get_queue())
+    return 'OK', 200
+
+@app.route('/radio', methods=['POST'])
+def radio():
+    videoId = request.form.get('videoId')
+    radio = ytmusic.get_watch_playlist(videoId, radio=True, limit=5)
+    player.queue.set_radio(radio)
+    player.play_queue()
+    socketio.emit('update_queue', player.queue.get_queue())
 
 @app.route('/skip', methods=['POST'])
 def skip():
@@ -78,5 +107,17 @@ def back():
     player.play_queue()
     return 'OK', 200
 
+@app.route('/remove', methods=['POST'])
+def remove():
+    uuid = request.form.get('uuid')
+    try:
+        player.queue.remove_song(uuid)
+    except ValueError:
+        return '', 404
+    return 'OK', 200
+
+# Start the VLC monitor in a separate thread
+vlc_thread = threading.Thread(target=vlc_monitor, daemon=True)
+vlc_thread.start()
 
 app.run(port=5000)
