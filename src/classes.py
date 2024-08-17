@@ -89,6 +89,7 @@ class Player:
         event_manager = self.player.event_manager()
         event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
         self.song_end = False
+        self.player.audio_set_volume(50)
 
     def get_time(self):
         return self.player.get_time()
@@ -125,9 +126,9 @@ class Player:
     def get_play_state(self):
         state = self.player.get_state()
         if state == vlc.State.Playing:
-            return 'Paused' # reversed because broki atm
-        elif state == vlc.State.Paused:
             return 'Playing'
+        elif state == vlc.State.Paused:
+            return 'Paused'
         else:
             return 'Ended'
 
@@ -206,3 +207,20 @@ class Queue:
                 from server import player
                 socketio.emit('update_queue', self.get_queue())
                 player.play_queue()
+
+    def jump_queue(self, uuid):
+        for index, song in enumerate(self.queue):
+            if str(song.get_id()) == str(uuid):
+                self.current_song = index
+                from server import player
+                player.play_queue()
+                break
+
+    def reorder(self, uuid_list):
+        new_queue = []
+        for uuid in uuid_list:
+            for song in self.queue:
+                if str(song.get_id()) == str(uuid):
+                    new_queue.append(song)
+                    break
+        self.queue = new_queue

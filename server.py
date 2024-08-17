@@ -25,6 +25,14 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
 
+@socketio.on('volume')
+def handle_volume(volume):
+    player.player.audio_set_volume(int(volume))
+
+@socketio.on('reorder')
+def handle_reorder(data):
+    player.queue.reorder(data)
+    socketio.emit('update_queue', player.queue.get_queue())
 
 player = Player()
 
@@ -56,6 +64,7 @@ def get_time():
 @app.route('/play_pause', methods=['POST'])
 def play_pause():
     player.play_pause()
+    time.sleep(0.1)
     socketio.emit('play_state', player.get_play_state())
     return 'OK', 200
 
@@ -123,6 +132,12 @@ def remove():
         player.queue.remove_song(uuid)
     except ValueError:
         return '', 404
+    return 'OK', 200
+
+@app.route('/jump_queue', methods=['POST'])
+def jump_queue():
+    uuid = request.form.get('uuid')
+    player.queue.jump_queue(uuid)
     return 'OK', 200
 
 # Start the VLC monitor in a separate thread

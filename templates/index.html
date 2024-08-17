@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
@@ -42,7 +43,7 @@
                     <img src="https://img.icons8.com/ios-filled/50/ffffff/skip-to-start.png" alt="Previous">
                 </button>
                 <button id="playPause" hx-post="/play_pause" hx-swap="none" class="w-14 h-14">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/play.png" alt="Play">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=""><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>
                 </button>
                 <button id="next" hx-post="/skip" hx-swap="none" class="w-10 h-10">
                     <img src="https://img.icons8.com/ios-filled/50/ffffff/end.png" alt="Next">
@@ -51,14 +52,19 @@
 
             <!-- Progress Bar -->
             <div class="bg-gray-700 h-2 rounded-full relative">
-                <div id="progressBar" class="bg-green-500 h-full rounded-full" style="width: 0%;"></div>
+                <div id="progressBar" class="bg-green-500 h-full rounded-full" style="width: 50%;"></div>
             </div>
+            <input type="range" min="1" max="100" value="50" class="slider m-6 bg-gray-700" id="volume" oninput="setVolume(this.value)">
         </div>
         <div id="queue" class="sm:px-4 w-1/2 sm:w-2/5">
         </div>
     </div>
 </body>
 <script type="text/javascript">
+    var updateInteval;
+    var length = 0
+    var progress = 0
+
     function clearThisID(target) {
         document.getElementById(target).value = "";
     }
@@ -84,12 +90,16 @@
 
     socket.on('play_state', function(data) {
         var play_button = document.querySelector('#playPause'); // Get the song container element
-        var play_icon = document.querySelector('#playPause img');
         console.log(data);
         if (data == 'Playing') {
-            play_icon.src = "{{ url_for('static',filename='images/icons/pause.png') }}"
+            if (updateInteval) {
+                clearInterval(updateInteval);
+            }
+            updateInteval = setInterval(updateProgressBar, 1000);
+            play_button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=""><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>'
         } else if (data = 'Paused') {
-            play_icon.src = "{{ url_for('static',filename='images/icons/play.png') }}"
+            clearInterval(updateInteval);
+            play_button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=""><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>'
         }
     });
 
@@ -106,14 +116,18 @@
         current_song_album.innerHTML = data.album;
         var current_song_year = document.querySelector('#current_song_year');
         current_song_year.innerHTML = data.release_year;
+        length = data.duration - 1;
+        progress = 0;
+        if (updateInteval) {
+            clearInterval(updateInteval);
+        }
+        updateInteval = setInterval(updateProgressBar, 1000);
     });
 
     function createQueueItem(song) {
-        console.log(song);
-        console.log(song.uuid);
         return `
-        <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
-            <img class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
+        <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true">
+            <img hx-post="/jump_queue" hx-include="next input" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
             <div class="flex flex-wrap flex-col">
                 <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden">${song.title}</p>
                 <div class="flex text-[#b4b4b4]">
@@ -123,8 +137,31 @@
                 </div>
             </div>
             <img hx-post="/remove" hx-include="next input" hx-swap="none" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
-            <input type="hidden" name="uuid" value="${song.uuid}">
+            <input id="uuid" type="hidden" name="uuid" value="${song.uuid}">
         </div>`;
+    }
+
+    var queueList = document.getElementById('queue');
+    new Sortable(queueList, {
+        animation: 150,
+        onEnd: function (evt) {
+            console.log('reordered');
+            uuidList = Array.from(queueList.children).map(child => child.querySelector('#uuid').value);
+            console.log(uuidList);
+            socket.emit('reorder', uuidList);
+        }
+    });
+
+    function updateProgressBar() {
+        progress += 1;
+        let progress_bar = document.querySelector('#progressBar');
+        procent = Math.min(progress * 100 / length, 100);
+        progress_bar.style.width = procent + '%';
+
+    }
+
+    function setVolume(val) {
+        socket.emit('volume', val);
     }
 </script>
 </html>
