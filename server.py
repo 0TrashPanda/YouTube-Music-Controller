@@ -15,11 +15,13 @@ from src.classes import Player, Song
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
+    socketio.emit('update_queue', player.queue.get_queue())
     if player.get_play_state() == 'Ended':
         return
+    socketio.emit('current_song', player.get_current_song())
     socketio.emit('play_state', player.get_play_state())
-    socketio.emit('update_queue', player.queue.get_queue())
-    socketio.emit('current_song', player.queue.get_current_song().toJSON())
+    socketio.emit('current_time', player.get_time())
+    socketio.emit('volume', player.player.audio_get_volume())
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -28,11 +30,17 @@ def handle_disconnect():
 @socketio.on('volume')
 def handle_volume(volume):
     player.player.audio_set_volume(int(volume))
+    socketio.emit('volume', player.player.audio_get_volume())
 
 @socketio.on('reorder')
 def handle_reorder(data):
     player.queue.reorder(data)
     socketio.emit('update_queue', player.queue.get_queue())
+
+@socketio.on('seek')
+def handle_seek(pos):
+    player.player.set_position(float(pos))
+    socketio.emit('current_time', player.get_time())
 
 player = Player()
 
@@ -64,8 +72,7 @@ def get_time():
 @app.route('/play_pause', methods=['POST'])
 def play_pause():
     player.play_pause()
-    time.sleep(0.1)
-    socketio.emit('play_state', player.get_play_state())
+    socketio.emit('current_time', player.get_time())
     return 'OK', 200
 
 @app.route('/searchr', methods=['POST'])
@@ -144,4 +151,5 @@ def jump_queue():
 vlc_thread = threading.Thread(target=vlc_monitor, daemon=True)
 vlc_thread.start()
 
-app.run(port=5000)
+if __name__ == '__main__':
+    app.run(port=5000)

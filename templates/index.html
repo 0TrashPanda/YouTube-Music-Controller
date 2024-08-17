@@ -11,15 +11,11 @@
     <title>YTMC</title>
 </head>
 <body>
-    <button class="text-sm" hx-post="/play" hx-swap="none">play</button>
-    <button class="text-sm" hx-get="/get_time" hx-target="p">time</button>
-    <button class="text-sm" hx-post="/play_pause" hx-swap="none">play/pause</button>
-    <p id="time">00:00 - 00:00</p>
     <div class="mx-auto pt-4 max-w-[100rem] w-[200vw] sm:container flex">
         <div class="sm:px-4 w-1/2 sm:w-2/5">
             <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
                 <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-                <input id="search_input" hx-post="/searchr" hx-target="#song-container" hx-indicator="#loading-songs" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                <input value="s3rl" id="search_input" hx-post="/searchr" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
                 <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
             </div>
             <div id="song-container" class="">
@@ -63,7 +59,12 @@
 <script type="text/javascript">
     var updateInteval;
     var length = 0
-    var progress = 0
+    let startTime;
+    let elapsedTime = 0;
+    let progress_bar = document.querySelector('#progressBar');
+    let progress_bar_container = progress_bar.parentElement;
+    let isDragging = false;
+
 
     function clearThisID(target) {
         document.getElementById(target).value = "";
@@ -92,10 +93,12 @@
         var play_button = document.querySelector('#playPause'); // Get the song container element
         console.log(data);
         if (data == 'Playing') {
-            if (updateInteval) {
-                clearInterval(updateInteval);
-            }
-            updateInteval = setInterval(updateProgressBar, 1000);
+            startTime = Date.now() - elapsedTime;
+            if (updateInteval) clearInterval(updateInteval);
+            updateInteval = setInterval(function () {
+                elapsedTime = Date.now() - startTime;
+                updateProgressBar();
+            }, 50);
             play_button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=""><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>'
         } else if (data = 'Paused') {
             clearInterval(updateInteval);
@@ -117,11 +120,19 @@
         var current_song_year = document.querySelector('#current_song_year');
         current_song_year.innerHTML = data.release_year;
         length = data.duration - 1;
-        progress = 0;
-        if (updateInteval) {
-            clearInterval(updateInteval);
-        }
-        updateInteval = setInterval(updateProgressBar, 1000);
+        updateProgressBar();
+    });
+
+    socket.on('volume', function(data) {
+        var volume = document.querySelector('#volume');
+        volume.value = data;
+    });
+
+    socket.on('current_time', function(data) {
+        console.log('Current Time: ' + data);
+        startTime = Date.now() - data;
+        elapsedTime = data;
+        updateProgressBar();
     });
 
     function createQueueItem(song) {
@@ -153,15 +164,42 @@
     });
 
     function updateProgressBar() {
-        progress += 1;
-        let progress_bar = document.querySelector('#progressBar');
-        procent = Math.min(progress * 100 / length, 100);
+        if (isDragging) return;
+        procent = Math.min(elapsedTime / (length * 10), 100);
         progress_bar.style.width = procent + '%';
-
     }
 
     function setVolume(val) {
         socket.emit('volume', val);
     }
+
+    function updatePosition(event) {
+        if (!isDragging) return;
+        const containerRect = progress_bar_container.getBoundingClientRect();
+        let horizontalPosition = ((event.clientX - containerRect.left) / containerRect.width) * 100;
+        horizontalPosition = Math.max(0, Math.min(100, horizontalPosition));
+        progress_bar.style.width = `${horizontalPosition}%`;
+        socket.emit('seek', horizontalPosition / 100);
+        console.log('Seeking to: ' + horizontalPosition + '%');
+    }
+
+    function startDragging(event) {
+        isDragging = true;
+        updatePosition(event);
+    }
+
+    function stopDragging() {
+        isDragging = false;
+    }
+
+    progress_bar_container.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', updatePosition);
+    document.addEventListener('mouseup', stopDragging);
+    progress_bar.addEventListener('dragstart', function (event) {
+        event.preventDefault();
+    });
+    progress_bar_container.addEventListener('mousedown', function (event) {
+        event.preventDefault();
+    });
 </script>
 </html>

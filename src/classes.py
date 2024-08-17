@@ -83,6 +83,7 @@ class Song:
 class Player:
     def __init__(self):
         self.instance = vlc.Instance()
+        self.instance.log_unset() # stop vlc from printing to console
         self.player = self.instance.media_player_new()
         self.media = None
         self.queue = Queue()
@@ -105,6 +106,8 @@ class Player:
 
     def play_pause(self):
         self.player.pause()
+        time.sleep(0.1)
+        socketio.emit('play_state', self.get_play_state())
 
     def get_state(self):
         return self.media.get_state()
@@ -118,10 +121,16 @@ class Player:
         self.player.set_media(self.instance.media_new(self.queue.get_current_song().get_stream_url()))
         self.player.play()
 
+
     def play_queue(self):
         self.queue.get_current_song()
         self.play_song(self.queue.get_current_song())
-        socketio.emit('current_song', self.queue.get_current_song().toJSON())
+        song = self.queue.get_current_song().toJSON()
+        song['current_time'] = 0
+        socketio.emit('current_song', song)
+        socketio.emit('play_state', 'Playing')
+        socketio.emit('current_time', 0)
+
 
     def get_play_state(self):
         state = self.player.get_state()
@@ -134,6 +143,15 @@ class Player:
 
     def on_song_end(self, event):
         self.song_end = True
+
+    def get_current_song(self):
+        song = self.queue.get_current_song()
+        if not song:
+            return None
+        current_time = self.get_time()
+        song = song.toJSON()
+        song['current_time'] = current_time
+        return song
 
 
 class Queue:
