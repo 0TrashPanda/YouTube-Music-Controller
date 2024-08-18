@@ -219,7 +219,7 @@ class Queue:
             artists = [artist['name'] for artist in song_data['artists']]
             length = song_data['length']
             duration = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
-            song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['length'], videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=duration, album=song_data.get('album', {}).get('name', ''))
+            song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=duration, videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=length, album=song_data.get('album', {}).get('name', ''))
             # current_song + index + 1, song
             self.add_song_after_current(song, index)
             if index == 0:

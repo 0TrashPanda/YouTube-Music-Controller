@@ -1,2 +1,5 @@
 flask
 flask_socketio
+python-vlc
+ytmusicapi
+yt_dlp
