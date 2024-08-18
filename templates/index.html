@@ -16,7 +16,7 @@
         <div id="search" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
             <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
                 <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-                <input value="s3rl" id="search_input" hx-post="/searchr" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
+                <input id="search_input" hx-post="/searchr" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
                 <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
             </div>
             <div id="song-container" class="">
