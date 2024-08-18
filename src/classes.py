@@ -49,10 +49,11 @@ class Song:
             thumbnail_url = thumbnail.get('url', None)
 
             try:
-                stream_url = [f for f in info_dict['formats'] if f.get('format_note') == 'Default'][0]['url']
+                stream_url = [f for f in info_dict['formats'] if f.get('audio_channels')][0]['url']
             except IndexError:
                 print('No stream URL found')
-                print(info_dict['formats'])
+                import json
+                print(json.dumps(info_dict['formats'], indent=4))
                 stream_url = None
 
             self.stream_url = stream_url
@@ -162,8 +163,8 @@ class Queue:
     def add_song_at_end(self, song):
         self.queue.append(song)
 
-    def add_song_after_current(self, song):
-        self.queue.insert(self.current_song + 1, song)
+    def add_song_after_current(self, song, offset=0):
+        self.queue.insert(self.current_song + 1 + offset, song)
 
     def remove_song(self, uuid):
         for index, song in enumerate(self.queue):
@@ -212,7 +213,6 @@ class Queue:
         self.queue.append(song)
 
     def set_radio(self, radio):
-        self.clear_queue()
         for index, song_data in enumerate(radio['tracks']):
             videoId = song_data['videoId']
             video_url = f'https://music.youtube.com/watch?v={videoId}'
@@ -220,11 +220,14 @@ class Queue:
             length = song_data['length']
             duration = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
             song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['length'], videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=duration, album=song_data.get('album', {}).get('name', ''))
-            self.add_song_at_end(song)
+            # current_song + index + 1, song
+            self.add_song_after_current(song, index)
             if index == 0:
                 from server import player
+                if player.get_play_state() == 'Ended':
+                    player.play_queue()
+            if index % 5 == 0:
                 socketio.emit('update_queue', self.get_queue())
-                player.play_queue()
 
     def jump_queue(self, uuid):
         for index, song in enumerate(self.queue):

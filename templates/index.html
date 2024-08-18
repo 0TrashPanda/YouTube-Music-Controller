@@ -11,8 +11,9 @@
     <title>YTMC</title>
 </head>
 <body>
-    <div class="mx-auto pt-4 max-w-[100rem] w-[200vw] sm:container flex">
-        <div class="sm:px-4 w-1/2 sm:w-2/5">
+    <div class="overflow-x-auto scrollbar-hide lg:overflow-visible flex flex-row xl:space-x-4 space-x-0 2xl:container xl:mx-auto snap-x snap-mandatory">
+
+        <div id="search" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
             <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
                 <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
                 <input value="s3rl" id="search_input" hx-post="/searchr" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
@@ -21,9 +22,10 @@
             <div id="song-container" class="">
             </div>
         </div>
-        <div class="w-11/12 max-w-sm text-center">
+
+        <div id="player" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always text-center">
             <!-- Song Thumbnail -->
-            <img id="song_thumbnail" src="https://via.placeholder.com/300" alt="Song Thumbnail" class="w-full rounded-lg mb-6 shadow-lg">
+            <img id="song_thumbnail" class="max-h-[50vh] mx-auto rounded-lg shadow-lg object-cover" src="https://via.placeholder.com/300" alt="Song Thumbnail">
 
             <!-- Song Details -->
             <div class="mb-6">
@@ -52,9 +54,19 @@
             </div>
             <input type="range" min="1" max="100" value="50" class="slider m-6 bg-gray-700" id="volume" oninput="setVolume(this.value)">
         </div>
-        <div id="queue" class="sm:px-4 w-1/2 sm:w-2/5">
+
+        <div id="queue" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
         </div>
+
     </div>
+
+    <!-- Bottom navigation bar for small screens -->
+    <div class="lg:hidden fixed bottom-0 w-full bg-[rgba(15,15,15,.97)] text-white flex justify-around py-2">
+        <button onclick="scrollToPanel('search')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg></button>
+        <button onclick="scrollToPanel('player')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" /></svg></button>
+        <button onclick="scrollToPanel('queue')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg></button>
+    </div>
+
 </body>
 <script type="text/javascript">
     var updateInteval;
@@ -65,6 +77,10 @@
     let progress_bar_container = progress_bar.parentElement;
     let isDragging = false;
 
+    function scrollToPanel(panelId) {
+        const panel = document.getElementById(panelId);
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'center' });
+    }
 
     function clearThisID(target) {
         document.getElementById(target).value = "";
@@ -120,6 +136,7 @@
         var current_song_year = document.querySelector('#current_song_year');
         current_song_year.innerHTML = data.release_year;
         length = data.duration - 1;
+        console.log('Length: ' + length);
         updateProgressBar();
     });
 
@@ -140,14 +157,16 @@
         <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true">
             <img hx-post="/jump_queue" hx-include="next input" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
             <div class="flex flex-wrap flex-col">
-                <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden">${song.title}</p>
+                <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden w-full">${song.title}</p>
                 <div class="flex text-[#b4b4b4]">
                     <p class="text-xs text-dark">${song.artists}</p>
                     <span class="text-xs text-dark whitespace-pre"> • </span>
                     <p class="text-xs text-dark">${song.duration_string}</p>
                 </div>
             </div>
-            <img hx-post="/remove" hx-include="next input" hx-swap="none" class="cursor-pointer w-6 min-w-6 mr-2 ml-auto" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
+            <div class="ml-auto">
+                <img hx-post="/remove" hx-include="next input" hx-swap="none" class="cursor-pointer w-6 min-w-6 m-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="remove">
+            </div>
             <input id="uuid" type="hidden" name="uuid" value="${song.uuid}">
         </div>`;
     }
