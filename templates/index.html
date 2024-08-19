@@ -180,8 +180,8 @@
     function createQueueItem(song) {
         return `
         <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true">
-            <img hx-post="/jump_queue" hx-include="next input" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
-            <div hx-post="/jump_queue" hx-include="next input" class="flex flex-wrap flex-col">
+            <img hx-post="/jump_queue" hx-include="next input" hx-swap="none" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
+            <div hx-post="/jump_queue" hx-include="next input" hx-swap="none" class="flex flex-wrap flex-col">
                 <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden w-full">${song.title}</p>
                 <div class="flex text-[#b4b4b4]">
                     <p class="text-xs text-dark">${song.artists}</p>
