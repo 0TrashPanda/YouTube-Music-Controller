@@ -158,13 +158,13 @@ class Player:
 class Queue:
     def __init__(self):
         self.queue = []
-        self.current_song = 0
+        self.current_song = None
 
     def add_song_at_end(self, song):
         self.queue.append(song)
 
     def add_song_after_current(self, song, offset=0):
-        self.queue.insert(self.current_song + 1 + offset, song)
+        self.queue.insert(self.get_current_index() + 1 + offset, song)
 
     def remove_song(self, uuid):
         for index, song in enumerate(self.queue):
@@ -174,13 +174,14 @@ class Queue:
         socketio.emit('update_queue', self.get_queue())
 
     def remove_song_at_index(self, index):
-        if index == self.current_song:
+        current_song_index = self.get_current_index()
+        if index == current_song_index:
             self.next_song()
             from server import player
             player.play_queue()
         self.queue.pop(index)
-        if self.current_song > index:
-            self.current_song -= 1
+        if current_song_index > index:
+            current_song_index -= 1
 
     def get_queue(self):
         return [song.toJSON() for song in self.queue]
@@ -190,24 +191,26 @@ class Queue:
 
     def get_current_song(self):
         if self.queue:
-            return self.queue[self.current_song]
+            return self.queue[self.get_current_index()]
         else:
             return None
 
     def set_current_song(self, index):
-        self.current_song = index
+        self.current_song = str(self.queue[index].get_id())
 
     def next_song(self):
-        if self.current_song + 1 >= len(self.queue):
-            self.current_song = 0
+        current_song_index = self.get_current_index()
+        if current_song_index + 1 >= len(self.queue):
+            current_song_index = 0
         else:
-            self.current_song += 1
+            self.set_current_song(current_song_index + 1)
 
     def previous_song(self):
-        if self.current_song - 1 < 0:
-            self.current_song = len(self.queue) - 1
+        current_song_index = self.get_current_index()
+        if current_song_index - 1 < 0:
+            current_song_index = len(self.queue) - 1
         else:
-            self.current_song -= 1
+            self.set_current_song(current_song_index - 1)
 
     def add_song_at_end(self, song):
         self.queue.append(song)
@@ -232,7 +235,7 @@ class Queue:
     def jump_queue(self, uuid):
         for index, song in enumerate(self.queue):
             if str(song.get_id()) == str(uuid):
-                self.current_song = index
+                self.current_song = str(uuid)
                 from server import player
                 player.play_queue()
                 break
@@ -245,3 +248,9 @@ class Queue:
                     new_queue.append(song)
                     break
         self.queue = new_queue
+
+    def get_current_index(self):
+        for index, song in enumerate(self.queue):
+            if str(song.get_id()) == self.current_song:
+                return index
+        return 0

@@ -4,6 +4,8 @@
 
 *{
     min-width: 0;
+    scrollbar-color: #cdcdcd #1d1d1d;
+    scrollbar-width: thin;
 }
 
 body {

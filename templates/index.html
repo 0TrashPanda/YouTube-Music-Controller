@@ -138,7 +138,32 @@
         length = data.duration - 1;
         console.log('Length: ' + length);
         updateProgressBar();
+        HighlightCurrentSong(data.uuid);
+        scrollToCurrentSong(data.uuid);
     });
+
+    function HighlightCurrentSong(uuid) {
+        var queue = document.querySelector('#queue');
+        var queue_items = queue.children;
+        for (item of queue_items) {
+            if (item.querySelector('#uuid').value == uuid) {
+                item.style.backgroundColor = 'rgba(255,255,255,.1)';
+            } else {
+                item.style.backgroundColor = 'transparent';
+            }
+        }
+    }
+
+    function scrollToCurrentSong(uuid) {
+        var queue = document.querySelector('#queue');
+        var queue_items = queue.children;
+        for (item of queue_items) {
+            if (item.querySelector('#uuid').value == uuid) {
+                item.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                return;
+            }
+        }
+    }
 
     socket.on('volume', function(data) {
         var volume = document.querySelector('#volume');
@@ -156,7 +181,7 @@
         return `
         <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true">
             <img hx-post="/jump_queue" hx-include="next input" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
-            <div class="flex flex-wrap flex-col">
+            <div hx-post="/jump_queue" hx-include="next input" class="flex flex-wrap flex-col">
                 <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden w-full">${song.title}</p>
                 <div class="flex text-[#b4b4b4]">
                     <p class="text-xs text-dark">${song.artists}</p>
