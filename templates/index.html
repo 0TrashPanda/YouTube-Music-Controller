@@ -81,6 +81,7 @@
     let progress_bar = document.querySelector('#progressBar');
     let progress_bar_container = progress_bar.parentElement;
     let isDragging = false;
+    let current_song_uuid = null;
 
     function scrollToPanel(panelId) {
         const panel = document.getElementById(panelId);
@@ -107,6 +108,8 @@
         for (song of data) {
             queue.innerHTML += createQueueItem(song);
         }
+        scrollToCurrentSong(current_song_uuid);
+        HighlightCurrentSong(current_song_uuid);
         htmx.process(queue);
     });
 
@@ -139,8 +142,9 @@
         current_song_year.innerHTML = data.release_year;
         length = data.duration - 1;
         updateProgressBar();
-        HighlightCurrentSong(data.uuid);
         scrollToCurrentSong(data.uuid);
+        HighlightCurrentSong(data.uuid);
+        current_song_uuid = data.uuid;
     });
 
     function HighlightCurrentSong(uuid) {

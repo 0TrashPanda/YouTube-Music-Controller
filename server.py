@@ -86,12 +86,9 @@ def searchr():
 @app.route('/search_suggestions')
 def search_suggestions():
     search_query = request.args.get('q', '').strip()
-    print(request.args)
     if search_query == "":
         return '', 204
-    print(search_query)
     jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
-    print(jsons)
     return jsonify(jsons)
 
 @app.route('/play_next', methods=['POST'])
