@@ -73,6 +73,7 @@
     </div>
 
 </body>
+<script src="{{ url_for('static',filename='js/suggestions.js') }}"></script>
 <script type="text/javascript">
     var updateInteval;
     var length = 0
@@ -220,61 +221,6 @@
         socket.emit('volume', val);
     }
 
-    function showSuggestions(value) {
-        if (value.length == 0) {
-            document.getElementById('suggestions-container').classList.add('hidden');
-            return;
-        }
-        fetch('/search_suggestions?q=' + encodeURIComponent(value))
-            .then(response => response.json())
-            .then(data => {
-                var suggestionsContainer = document.getElementById('suggestions-container');
-                suggestionsContainer.innerHTML = '';
-                data.forEach(suggestion => {
-                    if (value == suggestion.text) {
-                        return;
-                    }
-                    // Create a div for each suggestion
-                    const suggestionDiv = document.createElement('div');
-                    suggestionDiv.className = 'p-2 cursor-pointer hover:bg-zinc-700';
-                    // Create a span to hold the formatted suggestion text
-                    const suggestionText = document.createElement('span');
-                    // Process the "runs" to format text
-                    suggestion.runs.forEach(run => {
-                        const textNode = document.createElement('span');
-                        textNode.textContent = run.text;
-                        if (run.bold) {
-                            textNode.style.fontWeight = 'bold';
-                        }
-                        suggestionText.appendChild(textNode);
-                    });
-                    // Append the formatted text to the suggestion div
-                    suggestionDiv.appendChild(suggestionText);
-                    // Add click event to select suggestion
-                    suggestionDiv.onmousedown = () => {
-                        let search_input = document.getElementById('search_input');
-                        text = suggestionText.textContent;
-                        search_input.value = text;
-                        document.getElementById('search_img').click();
-                    };
-                    // Append suggestion div to the container
-                    suggestionsContainer.appendChild(suggestionDiv);
-                });
-                // Show the suggestions container if there are suggestions
-                if (data.length > 0) {
-                    suggestionsContainer.classList.remove('hidden');
-                } else {
-                    suggestionsContainer.classList.add('hidden');
-                }
-            });
-    }
-
-    function hideSuggestions() {
-        setTimeout(() => {
-            document.getElementById('suggestions-container').classList.add('hidden');
-        }, 100);
-    }
-
     function updatePosition(event) {
         if (!isDragging) return;
         const containerRect = progress_bar_container.getBoundingClientRect();
@@ -304,12 +250,5 @@
     });
 
     scrollToPanel('player');
-
-    document.getElementById("search_input").addEventListener("keypress", function(event) {
-        // If the user presses the "Enter" key on the keyboard
-        if (event.key === "Enter") {
-          hideSuggestions();
-        }
-      });
 </script>
 </html>
