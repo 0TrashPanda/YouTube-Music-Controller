@@ -112,7 +112,6 @@
 
     socket.on('play_state', function(data) {
         var play_button = document.querySelector('#playPause'); // Get the song container element
-        console.log(data);
         if (data == 'Playing') {
             startTime = Date.now() - elapsedTime;
             if (updateInteval) clearInterval(updateInteval);
@@ -128,8 +127,6 @@
     });
 
     socket.on('current_song', function(data) {
-        console.log(data);
-        console.log(data.thumbnail);
         var song_thumbnail = document.querySelector('#song_thumbnail');
         song_thumbnail.src = data.thumbnail;
         var current_song_title = document.querySelector('#current_song_title');
@@ -141,7 +138,6 @@
         var current_song_year = document.querySelector('#current_song_year');
         current_song_year.innerHTML = data.release_year;
         length = data.duration - 1;
-        console.log('Length: ' + length);
         updateProgressBar();
         HighlightCurrentSong(data.uuid);
         scrollToCurrentSong(data.uuid);
@@ -176,7 +172,6 @@
     });
 
     socket.on('current_time', function(data) {
-        console.log('Current Time: ' + data);
         startTime = Date.now() - data;
         elapsedTime = data;
         updateProgressBar();
@@ -206,9 +201,7 @@
         animation: 150,
         handle: '.clear-icon',
         onEnd: function (evt) {
-            console.log('reordered');
             uuidList = Array.from(queueList.children).map(child => child.querySelector('#uuid').value);
-            console.log(uuidList);
             socket.emit('reorder', uuidList);
         }
     });
@@ -285,7 +278,6 @@
         horizontalPosition = Math.max(0, Math.min(100, horizontalPosition));
         progress_bar.style.width = `${horizontalPosition}%`;
         socket.emit('seek', horizontalPosition / 100);
-        console.log('Seeking to: ' + horizontalPosition + '%');
     }
 
     function startDragging(event) {
