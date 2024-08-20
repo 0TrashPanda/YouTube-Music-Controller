@@ -16,7 +16,7 @@
         <div id="search" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
             <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex flex-col cursor-pointer relative">
                 <div class="flex justify-between">
-                    <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search" onclick="hideSuggestions()">
+                    <img id="search_img" hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search" onclick="hideSuggestions()">
                     <input id="search_input" hx-post="/searchr" hx-target="#song-container" hx-trigger="keyup[key=='Enter']" class="w-full p-2 bg-transparent focus:outline-none" name="search_query" type="text" oninput="showSuggestions(this.value)" onfocusout="hideSuggestions()" placeholder="Search for songs" onfocus="showSuggestions(this.value)">
                     <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
                 </div>
@@ -258,8 +258,7 @@
                         let search_input = document.getElementById('search_input');
                         text = suggestionText.textContent;
                         search_input.value = text;
-                        search_input.focus();
-                        suggestionsContainer.classList.add('hidden');
+                        document.getElementById('search_img').click();
                     };
                     // Append suggestion div to the container
                     suggestionsContainer.appendChild(suggestionDiv);
@@ -309,5 +308,12 @@
     });
 
     scrollToPanel('player');
+
+    document.getElementById("search_input").addEventListener("keypress", function(event) {
+        // If the user presses the "Enter" key on the keyboard
+        if (event.key === "Enter") {
+          hideSuggestions();
+        }
+      });
 </script>
 </html>
