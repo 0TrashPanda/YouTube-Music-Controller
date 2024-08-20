@@ -14,10 +14,15 @@
     <div class="overflow-x-auto scrollbar-hide lg:overflow-visible flex flex-row xl:space-x-4 space-x-0 2xl:container xl:mx-auto snap-x snap-mandatory">
 
         <div id="search" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
-            <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex justify-between cursor-pointer">
-                <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search">
-                <input id="search_input" hx-post="/searchr" hx-target="#song-container" class="w-full p-2 bg-tranparent focus:outline-none" name="search_query" type="text">
-                <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
+            <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex flex-col cursor-pointer relative">
+                <div class="flex justify-between">
+                    <img hx-post="/searchr" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search" onclick="hideSuggestions()">
+                    <input id="search_input" hx-post="/searchr" hx-target="#song-container" hx-trigger="keyup[key=='Enter']" class="w-full p-2 bg-transparent focus:outline-none" name="search_query" type="text" oninput="showSuggestions(this.value)" onfocusout="hideSuggestions()" placeholder="Search for songs" onfocus="showSuggestions(this.value)">
+                    <img class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/clear.png') }}" alt="clear" onclick="clearThisID('search_input')">
+                </div>
+                <div id="suggestions-container" class="bg-primary w-full absolute top-full left-0 z-10 border border-gray-300 rounded-lg hidden">
+                    <!-- Suggestions will be dynamically inserted here -->
+                </div>
             </div>
             <div id="song-container" class="">
             </div>
@@ -216,6 +221,62 @@
 
     function setVolume(val) {
         socket.emit('volume', val);
+    }
+
+    function showSuggestions(value) {
+        if (value.length == 0) {
+            document.getElementById('suggestions-container').classList.add('hidden');
+            return;
+        }
+        fetch('/search_suggestions?q=' + encodeURIComponent(value))
+            .then(response => response.json())
+            .then(data => {
+                var suggestionsContainer = document.getElementById('suggestions-container');
+                suggestionsContainer.innerHTML = '';
+                data.forEach(suggestion => {
+                    if (value == suggestion.text) {
+                        return;
+                    }
+                    // Create a div for each suggestion
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.className = 'p-2 cursor-pointer hover:bg-gray-200';
+                    // Create a span to hold the formatted suggestion text
+                    const suggestionText = document.createElement('span');
+                    // Process the "runs" to format text
+                    suggestion.runs.forEach(run => {
+                        const textNode = document.createElement('span');
+                        textNode.textContent = run.text;
+                        if (run.bold) {
+                            textNode.style.fontWeight = 'bold';
+                        }
+                        suggestionText.appendChild(textNode);
+                    });
+                    // Append the formatted text to the suggestion div
+                    suggestionDiv.appendChild(suggestionText);
+                    // Add click event to select suggestion
+                    suggestionDiv.onmousedown = () => {
+                        let search_input = document.getElementById('search_input');
+                        text = suggestionText.textContent;
+                        search_input.value = text;
+                        search_input.focus();
+                        suggestionsContainer.classList.add('hidden');
+                    };
+                    // Append suggestion div to the container
+                    suggestionsContainer.appendChild(suggestionDiv);
+                });
+                // Show the suggestions container if there are suggestions
+                if (data.length > 0) {
+                    suggestionsContainer.classList.remove('hidden');
+                } else {
+                    suggestionsContainer.classList.add('hidden');
+                }
+            });
+    }
+
+    function hideSuggestions() {
+        setTimeout(() => {
+            document.getElementById('suggestions-container').classList.add('hidden');
+        }, 100);
     }
 
     function updatePosition(event) {

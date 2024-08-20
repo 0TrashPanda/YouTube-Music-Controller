@@ -82,6 +82,17 @@ def searchr():
         return '', 204
     jsons = ytmusic.search(search_query, filter='songs', limit=5)
     return render_template('songs.html', songs=jsons)
+# fetch('/search_suggestions?q=' + value)
+@app.route('/search_suggestions')
+def search_suggestions():
+    search_query = request.args.get('q', '').strip()
+    print(request.args)
+    if search_query == "":
+        return '', 204
+    print(search_query)
+    jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
+    print(jsons)
+    return jsonify(jsons)
 
 @app.route('/play_next', methods=['POST'])
 def play_next():
