@@ -23,3 +23,23 @@ h1 {
     line-height: 1.2;
     margin-bottom: 0.5em;
 }
+
+.options-menu {
+     visibility: hidden;
+     position: absolute;
+     right: 0;
+     top: 25px;
+     background-color: #fff;
+     border: 1px solid #ccc;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+     z-index: 1000;
+     width: 160px;
+}
+
+.options-menu ul li {
+    @apply  p-2 flex flex-row items-center cursor-pointer hover:bg-gray-200;
+}
+
+.options-menu ul li svg {
+    @apply w-5 mr-2;
+}

@@ -75,14 +75,14 @@ def play_pause():
     socketio.emit('current_time', player.get_time())
     return 'OK', 200
 
-@app.route('/searchr', methods=['POST'])
-def searchr():
+@app.route('/search', methods=['POST'])
+def search():
     search_query = request.form.get('search_query')
     if search_query == "":
         return '', 204
     jsons = ytmusic.search(search_query, filter='songs', limit=5)
     return render_template('songs.html', songs=jsons)
-# fetch('/search_suggestions?q=' + value)
+
 @app.route('/search_suggestions')
 def search_suggestions():
     search_query = request.args.get('q', '').strip()
