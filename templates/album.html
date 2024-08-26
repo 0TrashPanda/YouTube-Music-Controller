@@ -1,10 +1,10 @@
-{% if filter == 'album' %}
+<h1>Album: {{album.title}}</h1>
+<h2>Artists: {% for artist in album.artists %}{{ artist.name }}{% if not loop.last %}, {% endif %}{% endfor %}</h2>
+<h2>Year: {{album.year}}</h2>
 
-{% endif %}
-
-{% for song in songs %}
+{% for song in album.tracks %}
     <div class="p-2 h-20 w-full flex items-center border-b-[1px] border-[rgba(255,255,255,.1)]">
-        <img class="mr-4 ml-0 sm:ml-0 h-12 w-12 min-w-[48px] md:min-w-[60px] md:h-[60px] md:w-[60px] object-cover" src="{{ song.thumbnails[0].url }}" alt="{{ song.title }}">
+        <img class="mr-4 ml-0 sm:ml-0 h-12 w-12 min-w-[48px] md:min-w-[60px] md:h-[60px] md:w-[60px] object-cover" src="{{ album.thumbnails[0].url }}" alt="{{ song.title }}">
         <div class="flex flex-col justify-center flex-grow">
             <h3 class="text-ellipsis whitespace-nowrap overflow-hidden text-sm md:text-base">{{ song.title }}</h3>
             <div class="flex">
@@ -24,7 +24,7 @@
         <div class="min-w-24 ml-auto flex items-center justify-end space-x-2">
             <img hx-post="/radio" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
             <img hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
-            <img hx-post="/play_next" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
+            <img hx-post="/play_next" hx-vals="{'song': {{ song | tojson | safe }}, 'thumbnails': {{ album | tojson | safe }} }" hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
         </div>
     </div>
 {% endfor %}

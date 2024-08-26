@@ -54,6 +54,26 @@ def vlc_monitor():
             player.song_end = False
         time.sleep(0.2)
 
+def spit_filter(search_query):
+    spit = search_query.split('/')
+    if len(spit) == 1:
+        return {'filter': 'songs', 'search_query': search_query}
+    filter_letter = spit[0]
+    match filter_letter.casefold():
+        case 'a':
+            filter = 'artists'
+        case 'b':
+            filter = 'albums'
+        case 'p':
+            filter = 'playlists'
+        case 'v':
+            filter = 'videos'
+        case 's':
+            filter = 'songs'
+        case _:
+            return {'filter': 'songs', 'search_query': search_query}
+    return {'filter': filter, 'search_query': '/'.join(spit[1:])}
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -80,7 +100,16 @@ def search():
     search_query = request.form.get('search_query')
     if search_query == "":
         return '', 204
-    jsons = ytmusic.search(search_query, filter='songs', limit=5)
+    results = spit_filter(search_query)
+    filter = results['filter']
+    search_query = results['search_query']
+    jsons = ytmusic.search(search_query, filter=filter)
+    if filter == 'playlists':
+        return render_template('playlists.html', playlists=jsons)
+    if filter == 'artists':
+        return render_template('artists.html', artists=jsons)
+    if filter == 'albums':
+        return render_template('albums.html', albums=jsons)
     return render_template('songs.html', songs=jsons)
 
 @app.route('/search_suggestions')
@@ -95,10 +124,16 @@ def search_suggestions():
 def play_next():
     song_data = request.form.get('song')
     song_data = json.loads(song_data)
+    print(json.dumps(song_data, indent=4))
     videoId = song_data['videoId']
     video_url = f'https://music.youtube.com/watch?v={videoId}'
     artists = [artist['name'] for artist in song_data['artists']]
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
+
+    if song_data['thumbnails'] == None:
+        song_data['thumbnails'] = json.loads(request.form.get('thumbnails'))
+        print(json.loads(request.form.get('thumbnails')))
+
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data.get('album', {}).get('name', ''))
     player.queue.add_song_after_current(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
@@ -154,6 +189,13 @@ def jump_queue():
     uuid = request.form.get('uuid')
     player.queue.jump_queue(uuid)
     return 'OK', 200
+
+@app.route('/open_album', methods=['POST'])
+def open_album():
+    browseId = request.form.get('browseId')
+    print(request.form)
+    album = ytmusic.get_album(browseId)
+    return render_template('album.html', album=album)
 
 # Start the VLC monitor in a separate thread
 vlc_thread = threading.Thread(target=vlc_monitor, daemon=True)
