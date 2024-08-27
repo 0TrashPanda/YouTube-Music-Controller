@@ -130,7 +130,7 @@ def play_next():
     print(json.dumps(song_data, indent=4))
     videoId = song_data['videoId']
     video_url = f'https://music.youtube.com/watch?v={videoId}'
-    artists = [artist['name'] for artist in song_data['artists']]
+    artists = [artist.get('name', artist) for artist in song_data['artists']]
 
     if song_data['thumbnails'] == None:
         song_data['thumbnails'] = json.loads(request.form.get('thumbnails'))
@@ -199,6 +199,12 @@ def open_album():
     print(request.form)
     album = ytmusic.get_album(browseId)
     return render_template('album.html', album=album)
+
+@app.route('/clear_queue', methods=['POST'])
+def clear_queue():
+    player.queue.clear_queue()
+    socketio.emit('update_queue', player.queue.get_queue())
+    return 'OK', 200
 
 # Start the VLC monitor in a separate thread
 vlc_thread = threading.Thread(target=vlc_monitor, daemon=True)

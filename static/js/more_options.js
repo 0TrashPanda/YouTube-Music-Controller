@@ -42,3 +42,43 @@ function more_options(event, icon) {
 document.addEventListener('click', function () {
     optionsMenuTemplate.style.visibility = 'hidden';
 });
+
+function get_song(uuid) {
+    let song = song_dict[uuid];
+    return song;
+}
+
+function radio_song(uuid) {
+    console.log(uuid);
+    let song = get_song(uuid);
+    videoId = song.videoId;
+    console.log(song);
+    console.log(videoId);
+    // post request to /radio with videoId
+    // @app.route('/radio', methods=['POST'])
+    // def radio():
+    //     videoId = request.form.get('videoId')
+
+    fetch('/radio', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'videoId': videoId
+        })
+    })
+}
+
+function play_next(uuid) {
+    let song = get_song(uuid);
+    fetch('/play_next', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'song': JSON.stringify(song)
+        })
+    })
+}
