@@ -130,13 +130,27 @@ def play_next():
     print(json.dumps(song_data, indent=4))
     videoId = song_data['videoId']
     video_url = f'https://music.youtube.com/watch?v={videoId}'
-    artists = [artist.get('name', artist) for artist in song_data['artists']]
+    artists = [artist if isinstance(artist, str) else artist['name'] for artist in song_data['artists']]
 
-    if song_data['thumbnails'] == None:
-        song_data['thumbnails'] = json.loads(request.form.get('thumbnails'))
+    if song_data.get('thumbnail'):
+        thumbnail = [song_data['thumbnail']]
+    elif song_data['thumbnails'] == None:
+        thumbnail = json.loads(request.form.get('thumbnails')).get('url')
+        print('thumbnails:', json.loads(request.form.get('thumbnails')).__class__)
         print(json.loads(request.form.get('thumbnails')))
+    else:
+        thumbnail = song_data['thumbnails'][-1]['url']
 
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data.get('album', {}).get('name', ''))
+    if song_data.get('duration_string'):
+        song_data['duration'] = song_data['duration_string']
+        song_data['duration_seconds'] = song_data['duration']
+
+    if isinstance(song_data['album'], dict):
+        album = song_data.get('album', {}).get('name', '')
+    else:
+        album = song_data.get('album', '')
+
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=thumbnail, duration_string=song_data['duration'], album=album)
     player.queue.add_song_after_current(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()

@@ -37,7 +37,7 @@ h1 {
 }
 
 .options-menu ul li {
-    @apply  p-2 flex flex-row items-center cursor-pointer hover:bg-gray-200;
+    @apply  p-2 flex flex-row items-center cursor-pointer hover:bg-zinc-700;
 }
 
 .options-menu ul li svg {
