@@ -29,8 +29,11 @@ def handle_disconnect():
 
 @socketio.on('volume')
 def handle_volume(volume):
-    player.player.audio_set_volume(int(volume))
-    socketio.emit('volume', player.player.audio_get_volume())
+    try:
+        player.player.audio_set_volume(int(volume))
+    except:
+        return
+    socketio.emit('volume', volume)
 
 @socketio.on('reorder')
 def handle_reorder(data):
