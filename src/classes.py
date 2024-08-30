@@ -201,7 +201,7 @@ class Queue:
     def next_song(self):
         current_song_index = self.get_current_index()
         if current_song_index + 1 >= len(self.queue):
-            current_song_index = str(self.queue[0].get_id())
+            self.set_current_song(0)
         else:
             self.set_current_song(current_song_index + 1)
 
