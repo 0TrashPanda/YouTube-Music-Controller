@@ -73,6 +73,8 @@ def spit_filter(search_query):
             filter = 'videos'
         case 's':
             filter = 'songs'
+        case 'u':
+            filter = 'url'
         case _:
             return {'filter': 'songs', 'search_query': search_query}
     return {'filter': filter, 'search_query': '/'.join(spit[1:])}
@@ -106,6 +108,9 @@ def search():
     results = spit_filter(search_query)
     filter = results['filter']
     search_query = results['search_query']
+    if filter == 'url':
+        pl = ytmusic.get_playlist(playlistId=search_query, limit=5)
+        return render_template('playlists.html', playlist=pl)
     jsons = ytmusic.search(search_query, filter=filter)
     if filter == 'playlists':
         return render_template('playlists.html', playlists=jsons)
@@ -218,6 +223,21 @@ def open_album():
 def clear_queue():
     player.queue.clear_queue()
     socketio.emit('update_queue', player.queue.get_queue())
+    return 'OK', 200
+
+@app.route('/play_all', methods=['POST'])
+def play_all():
+    player.queue.clear_queue()
+    songs = json.loads(request.form.get('songs')).get('tracks')
+    for index, song_data in enumerate(songs):
+        videoId = song_data['videoId']
+        video_url = f'https://music.youtube.com/watch?v={videoId}'
+        artists = [artist['name'] for artist in song_data['artists']]
+        song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
+        player.queue.add_song_at_end(song)
+        if index == 0 and player.get_play_state() == 'Ended':
+            player.play_queue()
+        socketio.emit('update_queue', player.queue.get_queue())
     return 'OK', 200
 
 # Start the VLC monitor in a separate thread
