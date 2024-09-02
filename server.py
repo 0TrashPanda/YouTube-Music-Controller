@@ -227,13 +227,14 @@ def clear_queue():
 
 @app.route('/play_all', methods=['POST'])
 def play_all():
-    player.queue.clear_queue()
     songs = json.loads(request.form.get('songs')).get('tracks')
     for index, song_data in enumerate(songs):
         videoId = song_data['videoId']
         video_url = f'https://music.youtube.com/watch?v={videoId}'
         artists = [artist['name'] for artist in song_data['artists']]
-        song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
+        album_dict = song_data.get('album') or {}
+        album =  album_dict.get('name', 'no album found')
+        song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=album)
         player.queue.add_song_at_end(song)
         if index == 0 and player.get_play_state() == 'Ended':
             player.play_queue()

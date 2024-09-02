@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
     <title>YTMC</title>
 </head>
 <body>
-    <div class="overflow-x-auto scrollbar-hide lg:overflow-visible flex flex-row xl:space-x-4 space-x-0 2xl:container xl:mx-auto snap-x snap-mandatory">
+    <div class="overflow-x-auto scrollbar-hide lg:overflow-visible flex flex-row xl:space-x-4 space-x-4 2xl:container xl:mx-auto snap-x snap-mandatory">
 
-        <div id="search" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
-            <div class="w-full max-w-96 m-3 bg-secondary rounded-lg flex flex-col cursor-pointer relative">
+        <div id="search" class="pb-12 lg:pb-2 p-2 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
+            <div class="w-full max-w-96 my-3 mx-auto bg-secondary rounded-lg flex flex-col cursor-pointer relative">
                 <div class="flex justify-between">
                     <img id="search_img" hx-post="/search" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search" onclick="hideSuggestions()">
                     <input id="search_input" hx-post="/search" hx-target="#song-container" hx-trigger="keyup[key=='Enter']" class="w-full p-2 bg-transparent focus:outline-none" name="search_query" type="text" oninput="showSuggestions(this.value)" onfocusout="hideSuggestions()" placeholder="Search for songs" onfocus="showSuggestions(this.value)">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div id="player" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always text-center">
+        <div id="player" class="pb-12 lg:pb-2 p-2 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always text-center">
             <!-- Song Thumbnail -->
             <img id="song_thumbnail" class="max-h-[50vh] mb-6 mx-auto rounded-lg shadow-lg object-cover" src="https://via.placeholder.com/300" alt="Song Thumbnail">
 
@@ -60,16 +60,16 @@
             <input type="range" min="1" max="100" value="50" class="slider m-6 bg-gray-700" id="volume" oninput="setVolume(this.value)">
         </div>
 
-        <div id="queue" class="p-1 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
+        <div id="queue" class="pb-12 lg:pb-2 p-2 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
         </div>
 
     </div>
 
     <!-- Bottom navigation bar for small screens -->
-    <div class="lg:hidden fixed bottom-0 w-full bg-[rgba(15,15,15,.97)] text-white flex justify-around py-2">
-        <button onclick="scrollToPanel('search')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg></button>
-        <button onclick="scrollToPanel('player')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" /></svg></button>
-        <button onclick="scrollToPanel('queue')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg></button>
+    <div class="lg:hidden h-12 fixed bottom-0 w-full bg-[rgba(15,15,15,.97)] text-white flex justify-around py-2">
+        <button id="nav_search" onclick="scrollToPanel('search')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="nav_icon"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg></button>
+        <button id="nav_player" onclick="scrollToPanel('player')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="nav_icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" /></svg></button>
+        <button id="nav_queue" onclick="scrollToPanel('queue')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="nav_icon"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg></button>
     </div>
 
     <div id="options-menu-template" class="options-menu">
@@ -125,6 +125,7 @@
 </body>
 <script type="text/javascript" src="{{ url_for('static',filename='js/suggestions.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='js/more_options.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/nav.js') }}"></script>
 <script type="text/javascript">
     var updateInteval;
     var length = 0
@@ -135,11 +136,6 @@
     let isDragging = false;
     let current_song_uuid = null;
     var song_dict = {};
-
-    function scrollToPanel(panelId) {
-        const panel = document.getElementById(panelId);
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'center' });
-    }
 
     function clearThisID(target) {
         document.getElementById(target).value = "";
@@ -216,13 +212,24 @@
     function scrollToCurrentSong(uuid) {
         var queue = document.querySelector('#queue');
         var queue_items = queue.children;
-        for (item of queue_items) {
+        for (let item of queue_items) {
             if (item.querySelector('#uuid').value == uuid) {
-                item.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                // Get the position of the item relative to the top of the queue
+                var itemTop = item.offsetTop;
+
+                // Calculate the scroll position for vertical centering
+                var scrollPosition = itemTop - (queue.clientHeight / 2) + (item.offsetHeight / 2);
+
+                // Smoothly scroll the queue container only on the y-axis
+                queue.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'smooth'
+                });
                 return;
             }
         }
     }
+
 
     socket.on('volume', function(data) {
         var volume = document.querySelector('#volume');
@@ -237,7 +244,7 @@
 
     function createQueueItem(song) {
         return `
-        <div id="queue_item" class="p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]">
+        <div id="queue_item" class="ripple-container p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true" oncontextmenu="more_options_rc(event, this)">
             <img hx-post="/jump_queue" hx-include="next input" hx-swap="none" class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}">
             <div hx-post="/jump_queue" hx-include="next input" hx-swap="none" class="flex flex-wrap flex-col">
                 <p class="mb-1 text-ellipsis whitespace-nowrap overflow-hidden w-full">${song.title}</p>
@@ -248,23 +255,26 @@
                 </div>
             </div>
             <div class="ml-auto relative">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="options-icon size-6 cursor-pointer" onclick="more_options(event, this)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden lg:block options-icon size-6 cursor-pointer" onclick="more_options(event, this)">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-2 move-icon block lg:hidden size-6 cursor-pointer">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
                 </svg>
             </div>
             <input id="uuid" type="hidden" name="uuid" value="${song.uuid}">
         </div>`;
     }
 
-    // var queueList = document.getElementById('queue');
-    // new Sortable(queueList, {
-    //     animation: 150,
-    //     handle: '.clear-icon',
-    //     onEnd: function (evt) {
-    //         uuidList = Array.from(queueList.children).map(child => child.querySelector('#uuid').value);
-    //         socket.emit('reorder', uuidList);
-    //     }
-    // });
+    var queueList = document.getElementById('queue');
+    new Sortable(queueList, {
+        animation: 150,
+        handle: '.move-icon',
+        onEnd: function (evt) {
+            uuidList = Array.from(queueList.children).map(child => child.querySelector('#uuid').value);
+            socket.emit('reorder', uuidList);
+        }
+    });
 
     function updateProgressBar() {
         if (isDragging) return;
