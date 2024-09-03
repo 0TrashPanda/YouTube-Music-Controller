@@ -79,6 +79,31 @@ def spit_filter(search_query):
             return {'filter': 'songs', 'search_query': search_query}
     return {'filter': filter, 'search_query': '/'.join(spit[1:])}
 
+def create_song(song_data):
+    song_data = json.loads(song_data)
+    videoId = song_data['videoId']
+    video_url = f'https://music.youtube.com/watch?v={videoId}'
+    artists = [artist if isinstance(artist, str) else artist['name'] for artist in song_data['artists']]
+
+    if song_data.get('thumbnail'):
+        thumbnail = [song_data['thumbnail']]
+    elif song_data['thumbnails'] == None:
+        thumbnail = json.loads(request.form.get('thumbnails')).get('url')
+    else:
+        thumbnail = song_data['thumbnails'][-1]['url']
+
+    if song_data.get('duration_string'):
+        song_data['duration'] = song_data['duration_string']
+        song_data['duration_seconds'] = song_data['duration']
+
+    if isinstance(song_data['album'], dict):
+        album = song_data.get('album', {}).get('name', '')
+    else:
+        album = song_data.get('album', '')
+
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=thumbnail, duration_string=song_data['duration'], album=album)
+    return song
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -131,53 +156,28 @@ def search_suggestions():
 @app.route('/play_next', methods=['POST'])
 def play_next():
     song_data = request.form.get('song')
-    song_data = json.loads(song_data)
-    print(json.dumps(song_data, indent=4))
-    videoId = song_data['videoId']
-    video_url = f'https://music.youtube.com/watch?v={videoId}'
-    artists = [artist if isinstance(artist, str) else artist['name'] for artist in song_data['artists']]
-
-    if song_data.get('thumbnail'):
-        thumbnail = [song_data['thumbnail']]
-    elif song_data['thumbnails'] == None:
-        thumbnail = json.loads(request.form.get('thumbnails')).get('url')
-        print('thumbnails:', json.loads(request.form.get('thumbnails')).__class__)
-        print(json.loads(request.form.get('thumbnails')))
-    else:
-        thumbnail = song_data['thumbnails'][-1]['url']
-
-    if song_data.get('duration_string'):
-        song_data['duration'] = song_data['duration_string']
-        song_data['duration_seconds'] = song_data['duration']
-
-    if isinstance(song_data['album'], dict):
-        album = song_data.get('album', {}).get('name', '')
-    else:
-        album = song_data.get('album', '')
-
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=thumbnail, duration_string=song_data['duration'], album=album)
+    song = create_song(song_data)
     player.queue.add_song_after_current(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
+    socketio.emit('alert', f'Playing next: {song.title} by {", ".join(song.artists)}')
     socketio.emit('update_queue', player.queue.get_queue())
     return 'OK', 200
 
 @app.route('/add_to_queue', methods=['POST'])
 def add_to_queue():
     song_data = request.form.get('song')
-    song_data = json.loads(song_data)
-    videoId = song_data['videoId']
-    video_url = f'https://music.youtube.com/watch?v={videoId}'
-    artists = [artist['name'] for artist in song_data['artists']]
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=song_data['album']['name'])
+    song = create_song(song_data)
     player.queue.add_song_at_end(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
+    socketio.emit('alert', f'Added to queue: {song.title} by {", ".join(song.artists)}')
     socketio.emit('update_queue', player.queue.get_queue())
     return 'OK', 200
 
 @app.route('/radio', methods=['POST'])
 def radio():
+    socketio.emit('alert', 'adding radio')
     videoId = request.form.get('videoId')
     radio = ytmusic.get_watch_playlist(videoId, radio=True)
     player.queue.set_radio(radio)
@@ -215,7 +215,6 @@ def jump_queue():
 @app.route('/open_album', methods=['POST'])
 def open_album():
     browseId = request.form.get('browseId')
-    print(request.form)
     album = ytmusic.get_album(browseId)
     return render_template('album.html', album=album)
 

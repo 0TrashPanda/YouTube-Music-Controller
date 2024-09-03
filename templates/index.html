@@ -72,6 +72,9 @@
         <button id="nav_queue" onclick="scrollToPanel('queue')" class="focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="nav_icon"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg></button>
     </div>
 
+    <div id="alerts" class="w-full mb-16 absolute bottom-0 ">
+    </div>
+
     <div id="options-menu-template" class="options-menu">
         <ul class=" bg-primary">
             <li hx-post="/remove" hx-include="next input" hx-swap="none">
@@ -195,6 +198,17 @@
         scrollToCurrentSong(data.uuid);
         HighlightCurrentSong(data.uuid);
         current_song_uuid = data.uuid;
+    });
+
+    socket.on('alert', function(data) {
+        var alerts = document.querySelector('#alerts');
+        var alertDiv = document.createElement('div');
+        alertDiv.className = 'alert bg-primary text-white p-2 rounded-lg m-2';
+        alertDiv.textContent = data;
+        alerts.appendChild(alertDiv);
+        setTimeout(function() {
+            alerts.removeChild(alertDiv);
+        }, 1500);
     });
 
     function HighlightCurrentSong(uuid) {
