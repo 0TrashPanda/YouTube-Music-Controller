@@ -158,9 +158,13 @@ class Player:
 class Queue:
     def __init__(self):
         self.queue = []
+        self.radio_queue = []
         self.current_song = None
 
-    def add_song_at_end(self, song):
+    def add_song_at_end(self, song, radio=False):
+        if radio:
+            self.radio_queue.append(song)
+            return
         self.queue.append(song)
 
     def add_song_after_current(self, song, offset=0):
@@ -171,7 +175,7 @@ class Queue:
             if str(song.get_id()) == str(uuid):
                 self.remove_song_at_index(index)
                 break
-        socketio.emit('update_queue', self.get_queue())
+        socketio.emit('update_queue', self.get_queues())
 
     def remove_song_at_index(self, index):
         current_song_index = self.get_current_index()
@@ -185,6 +189,9 @@ class Queue:
 
     def get_queue(self):
         return [song.toJSON() for song in self.queue]
+
+    def get_radio_queue(self):
+        return [song.toJSON() for song in self.radio_queue]
 
     def clear_queue(self):
         self.queue.clear()
@@ -200,10 +207,15 @@ class Queue:
 
     def next_song(self):
         current_song_index = self.get_current_index()
-        if current_song_index + 1 >= len(self.queue):
-            self.set_current_song(0)
-        else:
+        if current_song_index + 1 < len(self.queue):
             self.set_current_song(current_song_index + 1)
+            return
+        if len(self.radio_queue) > 0:
+            self.add_song_at_end(self.radio_queue.pop(0))
+            self.set_current_song(len(self.queue) - 1)
+            socketio.emit('update_queue', self.get_queues())
+            return
+        self.set_current_song(0)
 
     def previous_song(self):
         current_song_index = self.get_current_index()
@@ -211,9 +223,6 @@ class Queue:
             current_song_index = len(self.queue) - 1
         else:
             self.set_current_song(current_song_index - 1)
-
-    def add_song_at_end(self, song):
-        self.queue.append(song)
 
     def set_radio(self, radio):
         for index, song_data in enumerate(radio['tracks']):
@@ -224,13 +233,13 @@ class Queue:
             duration = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
             song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=duration, videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=length, album=song_data.get('album', {}).get('name', ''))
             # current_song + index + 1, song
-            self.add_song_after_current(song, index)
+            self.add_song_at_end(song, radio=True)
             if index == 0:
                 from server import player
                 if player.get_play_state() == 'Ended':
                     player.play_queue()
             if index % 5 == 0:
-                socketio.emit('update_queue', self.get_queue())
+                socketio.emit('update_queue', self.get_queues())
 
     def jump_queue(self, uuid):
         for index, song in enumerate(self.queue):
@@ -254,3 +263,9 @@ class Queue:
             if str(song.get_id()) == self.current_song:
                 return index
         return 0
+
+    def get_queues(self):
+        return {
+            'queue': self.get_queue(),
+            'radio_queue': self.get_radio_queue()
+        }

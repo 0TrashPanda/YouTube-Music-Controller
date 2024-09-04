@@ -80,3 +80,14 @@ h1 {
 .alert p {
     @apply text-center text-white;
 }
+
+.song:hover .thumbnail {
+    @apply brightness-50
+}
+.song:hover .play-icon {
+    @apply opacity-100;
+}
+
+.ghost {
+    @apply !bg-black
+}

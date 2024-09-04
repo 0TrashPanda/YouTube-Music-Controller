@@ -15,7 +15,7 @@ from src.classes import Player, Song
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
     if player.get_play_state() == 'Ended':
         return
     socketio.emit('current_song', player.get_current_song())
@@ -38,7 +38,7 @@ def handle_volume(volume):
 @socketio.on('reorder')
 def handle_reorder(data):
     player.queue.reorder(data)
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
 
 @socketio.on('seek')
 def handle_seek(pos):
@@ -161,7 +161,7 @@ def play_next():
     if player.get_play_state() == 'Ended':
         player.play_queue()
     socketio.emit('alert', f'Playing next: {song.title} by {", ".join(song.artists)}')
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
 @app.route('/add_to_queue', methods=['POST'])
@@ -172,7 +172,7 @@ def add_to_queue():
     if player.get_play_state() == 'Ended':
         player.play_queue()
     socketio.emit('alert', f'Added to queue: {song.title} by {", ".join(song.artists)}')
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
 @app.route('/radio', methods=['POST'])
@@ -181,7 +181,7 @@ def radio():
     videoId = request.form.get('videoId')
     radio = ytmusic.get_watch_playlist(videoId, radio=True)
     player.queue.set_radio(radio)
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
 @app.route('/skip', methods=['POST'])
@@ -221,7 +221,7 @@ def open_album():
 @app.route('/clear_queue', methods=['POST'])
 def clear_queue():
     player.queue.clear_queue()
-    socketio.emit('update_queue', player.queue.get_queue())
+    socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
 @app.route('/play_all', methods=['POST'])
@@ -237,7 +237,7 @@ def play_all():
         player.queue.add_song_at_end(song)
         if index == 0 and player.get_play_state() == 'Ended':
             player.play_queue()
-        socketio.emit('update_queue', player.queue.get_queue())
+        socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
 # Start the VLC monitor in a separate thread

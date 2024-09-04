@@ -2,7 +2,7 @@
 const sections = {
     search: document.getElementById('search'),
     player: document.getElementById('player'),
-    queue: document.getElementById('queue'),
+    queues: document.getElementById('queues'),
 };
 function scrollToPanel(panelId) {
     console.log('scrollToPanel', panelId );
@@ -16,13 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const sections = {
         search: document.getElementById('search'),
         player: document.getElementById('player'),
-        queue: document.getElementById('queue'),
+        queues: document.getElementById('queues'),
     };
 
     const navButtons = {
         search: document.getElementById('nav_search').getElementsByTagName('svg')[0],
         player: document.getElementById('nav_player').getElementsByTagName('svg')[0],
-        queue: document.getElementById('nav_queue').getElementsByTagName('svg')[0],
+        queues: document.getElementById('nav_queues').getElementsByTagName('svg')[0],
     };
 
     function setActiveNav(panelId) {
