@@ -706,6 +706,11 @@ video {
   display: none;
 }
 
+.size-10 {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 .size-12 {
   width: 3rem;
   height: 3rem;
@@ -724,16 +729,6 @@ video {
 .size-8 {
   width: 2rem;
   height: 2rem;
-}
-
-.size-10 {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.size-11 {
-  width: 2.75rem;
-  height: 2.75rem;
 }
 
 .h-10 {
@@ -992,10 +987,6 @@ video {
 
 .p-2 {
   padding: 0.5rem;
-}
-
-.p-4 {
-  padding: 1rem;
 }
 
 .px-4 {

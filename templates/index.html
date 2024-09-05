@@ -147,6 +147,7 @@
     is_mobile = mobile.matches;
     let sortableInstance = null;
     const queueList = document.getElementById('queue');
+    const radio_queue_list = document.getElementById('radio_queue');
 
 
     function clearThisID(target) {
@@ -311,8 +312,26 @@
             animation: 150,
             handle: handleSelector,
             ghostClass: 'ghost',
+            group: 'queue',
             onEnd: function (evt) {
-                const uuidList = Array.from(queueList.children).map(child => child.querySelector('#uuid') ? child.querySelector('#uuid').value : '');
+                const uuidList = {
+                    'queue': Array.from(queueList.children).map(child => child.querySelector('#uuid') ? child.querySelector('#uuid').value : ''),
+                    'radio_queue': Array.from(radio_queue_list.children).map(child => child.querySelector('#uuid') ? child.querySelector('#uuid').value : '')
+                }
+                socket.emit('reorder', uuidList);
+            }
+        });
+        // Create a new Sortable instance
+        sortableInstance = new Sortable(radio_queue_list, {
+            animation: 150,
+            handle: handleSelector,
+            ghostClass: 'ghost',
+            group: 'queue',
+            onEnd: function (evt) {
+                const uuidList = {
+                    'queue': Array.from(queueList.children).map(child => child.querySelector('#uuid') ? child.querySelector('#uuid').value : ''),
+                    'radio_queue': Array.from(radio_queue_list.children).map(child => child.querySelector('#uuid') ? child.querySelector('#uuid').value : '')
+                }
                 socket.emit('reorder', uuidList);
             }
         });

@@ -225,6 +225,7 @@ class Queue:
             self.set_current_song(current_song_index - 1)
 
     def set_radio(self, radio):
+        radio_queue = []
         for index, song_data in enumerate(radio['tracks']):
             videoId = song_data['videoId']
             video_url = f'https://music.youtube.com/watch?v={videoId}'
@@ -237,7 +238,7 @@ class Queue:
             if index == 0:
                 from server import player
                 if player.get_play_state() == 'Ended':
-                    player.play_queue()
+                    player.queue.next_song()
             if index % 5 == 0:
                 socketio.emit('update_queue', self.get_queues())
 
@@ -250,13 +251,18 @@ class Queue:
                 break
 
     def reorder(self, uuid_list):
-        new_queue = []
-        for uuid in uuid_list:
-            for song in self.queue:
-                if str(song.get_id()) == str(uuid):
-                    new_queue.append(song)
-                    break
-        self.queue = new_queue
+        queue = uuid_list.get('queue', [])
+        radio_queue = uuid_list.get('radio_queue', [])
+        uuid_map_queue = {str(song.get_id()): song for song in self.queue}
+        uuid_map_radio = {str(song.get_id()): song for song in self.radio_queue}
+
+        def rm_dupes(x):
+            return list(dict.fromkeys(x))
+
+        self.queue = [uuid_map_queue.pop(uuid) if uuid_map_queue.get(uuid) else uuid_map_radio.pop(uuid) for uuid in rm_dupes(queue) if uuid_map_queue.get(uuid) or uuid_map_radio.get(uuid)] + [song for song in uuid_map_queue.values() if str(song.get_id()) not in radio_queue]
+        self.radio_queue = [uuid_map_radio.pop(uuid) if uuid_map_radio.get(uuid) else uuid_map_queue.pop(uuid) for uuid in rm_dupes(radio_queue) if uuid_map_queue.get(uuid) or uuid_map_radio.get(uuid)] + list(uuid_map_radio.values())
+
+
 
     def get_current_index(self):
         for index, song in enumerate(self.queue):
