@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.min.js"></script>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='images/icons/speaker2.png') }}">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/output.css') }}">
     <title>YTMC</title>
@@ -214,7 +215,20 @@
         scrollToCurrentSong(data.uuid);
         HighlightCurrentSong(data.uuid);
         current_song_uuid = data.uuid;
+        setBackgroundGradient(data.thumbnail);
     });
+
+    function setBackgroundGradient(url) {
+        const colorThief = new ColorThief();
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.src = url;
+        img.onload = function () {
+            const colors = colorThief.getPalette(img, 2); // Get the dominant colors
+            document.querySelector('body').style.background =
+                `linear-gradient(to bottom right, rgba(${colors[0]}, 1), rgba(${colors[1]}, 1))`;
+        }
+    }
 
     socket.on('alert', function(data) {
         var alerts = document.querySelector('#alerts');
