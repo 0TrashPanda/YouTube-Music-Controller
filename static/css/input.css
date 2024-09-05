@@ -102,3 +102,11 @@ h1 {
 .ghost {
     @apply !bg-black
 }
+
+#search {
+    direction: rtl;
+}
+
+#search * {
+    direction: ltr;
+}
