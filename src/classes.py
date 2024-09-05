@@ -225,7 +225,7 @@ class Queue:
             self.set_current_song(current_song_index - 1)
 
     def set_radio(self, radio):
-        radio_queue = []
+        self.radio_queue = []
         for index, song_data in enumerate(radio['tracks']):
             videoId = song_data['videoId']
             video_url = f'https://music.youtube.com/watch?v={videoId}'
