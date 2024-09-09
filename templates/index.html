@@ -14,8 +14,8 @@
 <body>
     <div class="overflow-x-auto scrollbar-hide lg:overflow-visible flex flex-row xl:space-x-4 space-x-0 2xl:container xl:mx-auto snap-x snap-mandatory">
 
-        <div id="search" class="pb-12 lg:pb-2 p-2 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
-            <div class="w-full max-w-96 my-3 mx-auto bg-secondary rounded-lg flex flex-col cursor-pointer relative">
+        <div id="search" class="relative pb-12 lg:pb-2 p-2 flex-none w-screen lg:w-auto lg:flex-1 h-screen overflow-y-auto snap-center snap-always">
+            <div class="sticky top-0 z-50 w-full max-w-96 my-3 mx-auto bg-[rgba(100,100,100,.95)] rounded-lg flex flex-col cursor-pointer">
                 <div class="flex justify-between">
                     <img id="search_img" hx-post="/search" hx-target="#song-container" hx-include="[name='search_query']" class="w-16 h-10 px-4 py-2" src="{{ url_for('static',filename='images/icons/loupe.png') }}" alt="search" onclick="hideSuggestions()">
                     <input id="search_input" hx-post="/search" hx-target="#song-container" hx-trigger="keyup[key=='Enter']" class="w-full p-2 bg-transparent focus:outline-none" name="search_query" type="text" oninput="showSuggestions(this.value)" onfocusout="hideSuggestions()" placeholder="Search for songs" onfocus="showSuggestions(this.value)">

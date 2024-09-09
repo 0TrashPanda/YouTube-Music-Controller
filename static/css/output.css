@@ -640,6 +640,10 @@ video {
   z-index: 50;
 }
 
+.z-20 {
+  z-index: 20;
+}
+
 .m-2 {
   margin: 0.5rem;
 }
@@ -978,6 +982,46 @@ video {
 .bg-zinc-700 {
   --tw-bg-opacity: 1;
   background-color: rgb(63 63 70 / var(--tw-bg-opacity));
+}
+
+.bg-\[\] {
+  background-color: ;
+}
+
+.bg-\[rgba\] {
+  background-color: rgba;
+}
+
+.bg-\[rgba\(\)\] {
+  background-color: rgba();
+}
+
+.bg-\[rgba\(15\2c 15\2c 15\2c \)\] {
+  background-color: rgba(15,15,15,);
+}
+
+.bg-\[rgba\(15\2c 15\2c 15\2c \.9\)\] {
+  background-color: rgba(15,15,15,.9);
+}
+
+.bg-\[rgba\(150\2c 15\2c 15\2c \.9\)\] {
+  background-color: rgba(150,15,15,.9);
+}
+
+.bg-\[rgba\(150\2c 150\2c 15\2c \.9\)\] {
+  background-color: rgba(150,150,15,.9);
+}
+
+.bg-\[rgba\(150\2c 150\2c 150\2c \.9\)\] {
+  background-color: rgba(150,150,150,.9);
+}
+
+.bg-\[rgba\(100\2c 100\2c 100\2c \.9\)\] {
+  background-color: rgba(100,100,100,.9);
+}
+
+.bg-\[rgba\(100\2c 100\2c 100\2c \.95\)\] {
+  background-color: rgba(100,100,100,.95);
 }
 
 .object-cover {
