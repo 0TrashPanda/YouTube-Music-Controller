@@ -23,7 +23,7 @@
         </div>
         <div class="min-w-24 ml-auto flex items-center justify-end space-x-2">
             <img hx-post="/radio" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
-            <img hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
+            <img hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }}, "thumbnails": {{ album.thumbnails | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
             <img hx-post="/play_next" hx-vals='{"song": {{ song | tojson | safe }}, "thumbnails": {{ album.thumbnails | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next">
         </div>
     </div>

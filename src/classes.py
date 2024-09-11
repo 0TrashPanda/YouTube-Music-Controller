@@ -8,16 +8,16 @@ import threading
 ytmusic = YTMusic()
 
 class Song:
-    def __init__(self, video_url, title, artists, duration, videoId, thumbnail, duration_string, album):
+    def __init__(self, video_url, title, artists, duration_sec, videoId, thumbnail, duration_str, album):
         self.video_url = video_url
         self.title = title
         self.album = album
         self.artists = artists
-        self.duration = duration
+        self.duration_sec = duration_sec
         self.videoId = videoId
         self.thumbnail = thumbnail
         self.release_year = None
-        self.duration_string = duration_string
+        self.duration_str = duration_str
         self.stream_url = None
         threading.Thread(target=self.gen_data, daemon=True).start() # TODO kill all threads on new radio
 
@@ -65,9 +65,9 @@ class Song:
             'title': self.title,
             'thumbnail': self.thumbnail,
             'artists': self.artists,
-            'duration': self.duration,
+            'duration_sec': self.duration_sec,
             'videoId': self.videoId,
-            'duration_string': self.duration_string,
+            'duration_str': self.duration_str,
             'album': self.album,
             'release_year': self.release_year,
             'uuid': id(self)
@@ -175,16 +175,21 @@ class Queue:
             if str(song.get_id()) == str(uuid):
                 self.remove_song_at_index(index)
                 break
+        for index, song in enumerate(self.radio_queue):
+            if str(song.get_id()) == str(uuid):
+                self.remove_song_at_index(index, radio=True)
+                break
         socketio.emit('update_queue', self.get_queues())
 
-    def remove_song_at_index(self, index):
+    def remove_song_at_index(self, index, radio=False):
         current_song_index = self.get_current_index()
         if index == current_song_index:
             self.next_song()
             from server import player
             player.play_queue()
-        self.queue.pop(index)
-        if current_song_index > index:
+        queue = self.queue if not radio else self.radio_queue
+        queue.pop(index)
+        if current_song_index > index and not radio:
             current_song_index -= 1
 
     def get_queue(self):
@@ -231,8 +236,8 @@ class Queue:
             video_url = f'https://music.youtube.com/watch?v={videoId}'
             artists = [artist['name'] for artist in song_data['artists']]
             length = song_data['length']
-            duration = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
-            song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=duration, videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_string=length, album=song_data.get('album', {}).get('name', ''))
+            duration_sec = sum(x * 60 ** i for i, x in enumerate(reversed(list(map(int, length.split(':'))))))
+            song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration_sec=duration_sec, videoId=song_data['videoId'], thumbnail=song_data['thumbnail'][-1]['url'], duration_str=length, album=song_data.get('album', {}).get('name', ''))
             # current_song + index + 1, song
             self.add_song_at_end(song, radio=True)
             if index == 0:
@@ -243,11 +248,19 @@ class Queue:
                 socketio.emit('update_queue', self.get_queues())
 
     def jump_queue(self, uuid):
-        for index, song in enumerate(self.queue):
+        for song in self.queue:
             if str(song.get_id()) == str(uuid):
                 self.current_song = str(uuid)
                 from server import player
                 player.play_queue()
+                break
+        for song in self.radio_queue:
+            if str(song.get_id()) == str(uuid):
+                self.add_song_after_current(self.radio_queue.pop(self.radio_queue.index(song)))
+                self.current_song = str(uuid)
+                from server import player
+                player.play_queue()
+                socketio.emit('update_queue', self.get_queues())
                 break
 
     def reorder(self, uuid_list):

@@ -11,6 +11,7 @@ ytmusic = YTMusic()
 app = Flask(__name__)
 socketio = SocketIO(app)
 from src.classes import Player, Song
+from src.search_builder import Songs, Radio
 
 @socketio.on('connect')
 def handle_connect():
@@ -75,15 +76,29 @@ def spit_filter(search_query):
             filter = 'songs'
         case 'u':
             filter = 'url'
+        case 'r':
+            filter = 'radio'
         case _:
             return {'filter': 'songs', 'search_query': search_query}
     return {'filter': filter, 'search_query': '/'.join(spit[1:])}
 
 def create_song(song_data):
     song_data = json.loads(song_data)
+    print(json.dumps(song_data, indent=4))
     videoId = song_data['videoId']
+    duration_str = song_data.get('duration_str', song_data.get('duration', '0:00'))
+    duration_sec = song_data.get('duration_sec', song_data.get('duration_seconds', 0))
     video_url = f'https://music.youtube.com/watch?v={videoId}'
     artists = [artist if isinstance(artist, str) else artist['name'] for artist in song_data['artists']]
+    if song_data.get('secondary'):
+        artists = song_data['artists']
+        album = song_data['album']
+    else:
+        if isinstance(song_data['album'], dict):
+            album = song_data.get('album', {}).get('name', '')
+        else:
+            album = song_data.get('album', '')
+
 
     if song_data.get('thumbnail'):
         thumbnail = [song_data['thumbnail']]
@@ -92,16 +107,7 @@ def create_song(song_data):
     else:
         thumbnail = song_data['thumbnails'][-1]['url']
 
-    if song_data.get('duration_string'):
-        song_data['duration'] = song_data['duration_string']
-        song_data['duration_seconds'] = song_data['duration']
-
-    if isinstance(song_data['album'], dict):
-        album = song_data.get('album', {}).get('name', '')
-    else:
-        album = song_data.get('album', '')
-
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=thumbnail, duration_string=song_data['duration'], album=album)
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration_str=duration_str, videoId=song_data['videoId'], thumbnail=thumbnail, duration_sec=duration_sec, album=album)
     return song
 
 @app.route('/')
@@ -136,6 +142,9 @@ def search():
     if filter == 'url':
         pl = ytmusic.get_playlist(playlistId=search_query, limit=5)
         return render_template('playlists.html', playlist=pl)
+    if filter == 'radio':
+        radio = ytmusic.get_watch_playlist(search_query, radio=True)
+        return render_template('search.html', search=Radio(radio).get_songs())
     jsons = ytmusic.search(search_query, filter=filter)
     if filter == 'playlists':
         return render_template('playlists.html', playlists=jsons)
@@ -143,7 +152,7 @@ def search():
         return render_template('artists.html', artists=jsons)
     if filter == 'albums':
         return render_template('albums.html', albums=jsons)
-    return render_template('songs.html', songs=jsons)
+    return render_template('search.html', search=Songs(jsons).get_songs())
 
 @app.route('/search_suggestions')
 def search_suggestions():

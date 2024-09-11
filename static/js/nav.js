@@ -5,9 +5,7 @@ const sections = {
     queues: document.getElementById('queues'),
 };
 function scrollToPanel(panelId) {
-    console.log('scrollToPanel', panelId );
     if (sections[panelId]) {
-        console.log('scrolling to', panelId);
         sections[panelId].scrollIntoView({ behavior: 'smooth' });
     }
 }
