@@ -26,12 +26,9 @@
             </div>
         </div>
         <div class="min-w-6 ml-auto flex items-center justify-end space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden lg:block options-icon size-6 cursor-pointer" onclick='more_options(event, "{{ song.videoId }}", "{{ search.type }}")'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="options-icon size-6 cursor-pointer" onclick='more_options(event, "{{ song.videoId }}", "{{ search.type }}")'>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
             </svg>
-            <!-- <img hx-post="/radio" hx-vals='{"videoId":"{{ song.videoId }}"}' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/radio.png') }}" alt="radio" title="Radio">
-            <img hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/add_to_queue.png') }}" alt="add_to_queue" title="Add to queue">
-            <img hx-post="/play_next" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="cursor-pointer w-6 h-6" src="{{ url_for('static',filename='images/icons/play_next.png') }}" alt="play_next" title="Play next"> -->
         </div>
         <input id="search-song-{{song.videoId}}" type="hidden" name="uuid" value='{{song | tojson | safe}}'>
     </div>
