@@ -125,6 +125,11 @@ function more_options(event, item, item_type) {
     const uuid = item;
     menu.querySelector('input[name="uuid"]').value = uuid;
 
+    menu.style.visibility = 'invisible';
+
+    // Append the menu to the document body
+    document.body.appendChild(menu);
+
     // Calculate the default position based on the clicked icon
     const rect = event.currentTarget.getBoundingClientRect();
     let top = y !== null ? y : rect.bottom + window.scrollY;
@@ -148,9 +153,6 @@ function more_options(event, item, item_type) {
     menu.style.top = `${top}px`;
     menu.style.left = `${left}px`;
     menu.style.visibility = 'visible';
-
-    // Append the menu to the document body
-    document.body.appendChild(menu);
 
     // Reprocess the menu to ensure it updates with HTMX
     htmx.process(menu);
