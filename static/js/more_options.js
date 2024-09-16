@@ -94,10 +94,40 @@ options = {
             </li>
         </ul>
         <input id="more_uuid" type="hidden" name="uuid">
+    </div>`,
+    'albums': `<div id="options-menu-album" class="options-menu">
+        <ul class=" bg-primary">
+            <li onclick="open_album(uuid=document.getElementById('more_uuid').value)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+                Open
+            </li>
+            <li onclick="play_next(uuid=document.getElementById('more_uuid').value)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" />
+                </svg>
+                Play all next
+            </li>
+            <li onclick="play_end(uuid=document.getElementById('more_uuid').value)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25" />
+                </svg>
+                Add all to queue
+            </li>
+            <li onclick="Search_artist(uuid=document.getElementById('more_uuid').value)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                Search artist
+            </li>
+        </ul>
+        <input id="more_uuid" type="hidden" name="uuid">
     </div>`
 };
 
 const optionsMenuTemplate = document.createElement('template');
+const song_container = document.getElementById('song-container');
 
 function more_options(event, item, item_type) {
     // if right click, set x and y
@@ -159,11 +189,6 @@ function more_options(event, item, item_type) {
 
     // Stop event propagation
     event.stopPropagation();
-}
-
-function more_options_rc(event, icon) {
-    event.preventDefault();
-    more_options(event, icon.querySelector('svg'), x=event.clientX, y=event.clientY);
 }
 
 // Close the menu when clicking outside of it
@@ -311,4 +336,27 @@ function remove_song(uuid) {
             'uuid': JSON.stringify(song.uuid)
         })
     })
+}
+
+function open_album(uuid) {
+    fetch('/open_album', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'browseId': uuid
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.text();
+        })
+        .then(html => {
+            console.log(html);
+            song_container.innerHTML = html;
+            htmx.process(song_container);
+        });
 }

@@ -4,10 +4,10 @@ class Songs():
         self.has_main = False
         self.list_items = []
         for song in song_data:
-            song = self.create_song(song)
+            song = self.create_item(song)
             self.list_items.append(song)
 
-    def create_song(self, song):
+    def create_item(self, song):
         title = self.set_title(song)
         artist = self.set_artist(song)
         album = self.set_album(song)
@@ -15,6 +15,9 @@ class Songs():
         videoId = self.set_videoId(song)
         duration_str = self.set_duration_str(song)
         duration_sec = self.set_duration_sec(song)
+        year = self.set_year(song)
+        type = self.set_type(song)
+        secondary = self.set_secondary(song)
         song = {
             'title': title,
             'artists': artist,
@@ -23,11 +26,9 @@ class Songs():
             'videoId': videoId,
             'duration_str': duration_str,
             'duration_sec': duration_sec,
-            'secondary': {
-                'artist': artist,
-                'album': album,
-                'duration_str': duration_str,
-            }
+            'year': year,
+            'type': type,
+            'secondary': secondary
         }
         return song
 
@@ -50,9 +51,22 @@ class Songs():
         return song['duration']
 
     def set_duration_sec(self, song):
-        return song['duration_seconds']
+        return song.get('duration_seconds', None)
 
-    def get_songs(self):
+    def set_year(self, song):
+        return song.get('year', None)
+
+    def set_type(self, song):
+        return song.get('type', None)
+
+    def set_secondary(self, song):
+        return {
+                'artist': self.set_artist(song),
+                'album': self.set_album(song),
+                'duration_str': self.set_duration_str(song),
+            }
+
+    def get_items(self):
         return {
             'type': self.type,
             'has_main': self.has_main,
@@ -65,7 +79,7 @@ class Radio(Songs):
         self.has_main = False
         self.list_items = []
         for song in song_data['tracks']:
-            song = self.create_song(song)
+            song = self.create_item(song)
             self.list_items.append(song)
 
     def set_thumbnail(self, song):
@@ -82,3 +96,57 @@ def timeStrToSec(timeStr):
     if len(timeStr) == 3:
         return int(timeStr[0]) * 3600 + int(timeStr[1]) * 60 + int(timeStr[2])
     return int(timeStr[0]) * 60 + int(timeStr[1])
+
+class Albums(Songs):
+    def __init__(self, search_data):
+        self.type = 'albums'
+        self.has_main = False
+        self.list_items = []
+        for album in search_data:
+            album = self.create_item(album)
+            self.list_items.append(album)
+
+    def set_videoId(self, song):
+        return song['browseId']
+
+    def set_secondary(self, song):
+        return {
+            'type': self.set_type(song),
+            'artist': self.set_artist(song),
+            'year': self.set_year(song)
+        }
+
+    def get_items(self):
+        return {
+            'type': self.type,
+            'has_main': self.has_main,
+            'list_items': self.list_items
+        }
+
+
+class Album(Songs):
+    def __init__(self, song_data):
+        import json
+        print(json.dumps(song_data, indent=4))
+        self.type = 'album'
+        self.has_main = True
+        self.title = song_data['title']
+        self.thumbnail = song_data['thumbnails'][-1]['url']
+        self.artists = [artist['name'] for artist in song_data['artists']]
+        self.list_items = []
+        for song in song_data['tracks']:
+            song = self.create_item(song)
+            self.list_items.append(song)
+
+    def set_thumbnail(self, song):
+        return self.thumbnail
+
+    def get_items(self):
+        return {
+            'type': self.type,
+            'has_main': self.has_main,
+            'title': self.title,
+            'thumbnail': self.thumbnail,
+            'artists': self.artists,
+            'list_items': self.list_items
+        }
