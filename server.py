@@ -11,7 +11,7 @@ ytmusic = YTMusic()
 app = Flask(__name__)
 socketio = SocketIO(app)
 from src.classes import Player, Song
-from src.search_builder import Album, Albums, Songs, Radio
+from src.search_builder import Album, Albums, Playlist, Songs, Radio
 
 @socketio.on('connect')
 def handle_connect():
@@ -141,7 +141,7 @@ def search():
     search_query = results['search_query']
     if filter == 'url':
         pl = ytmusic.get_playlist(playlistId=search_query, limit=5)
-        return render_template('playlists.html', playlist=pl)
+        return render_template('search.html', search=Playlist(pl).get_items())
     if filter == 'radio':
         radio = ytmusic.get_watch_playlist(search_query, radio=True)
         return render_template('search.html', search=Radio(radio).get_items())
@@ -249,7 +249,8 @@ def jump_queue():
 def open_album():
     browseId = request.form.get('browseId')
     album = ytmusic.get_album(browseId)
-    return render_template('album.html', album=album)
+    album = Album(album)
+    return render_template('search.html', search=album.get_items())
 
 @app.route('/clear_queue', methods=['POST'])
 def clear_queue():

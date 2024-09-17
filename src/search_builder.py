@@ -39,6 +39,8 @@ class Songs():
         return [artist['name'] for artist in song['artists']]
 
     def set_album(self, song):
+        if song.get('album', None) is None:
+            return 'no album found'
         return song.get('album', {}).get('name', 'no album found')
 
     def set_thumbnail(self, song):
@@ -126,13 +128,12 @@ class Albums(Songs):
 
 class Album(Songs):
     def __init__(self, song_data):
-        import json
-        print(json.dumps(song_data, indent=4))
         self.type = 'album'
         self.has_main = True
         self.title = song_data['title']
         self.thumbnail = song_data['thumbnails'][-1]['url']
         self.artists = [artist['name'] for artist in song_data['artists']]
+        self.year = song_data.get('year', None)
         self.list_items = []
         for song in song_data['tracks']:
             song = self.create_item(song)
@@ -141,6 +142,15 @@ class Album(Songs):
     def set_thumbnail(self, song):
         return self.thumbnail
 
+    def set_album(self, song):
+        return self.title
+
+    def set_secondary(self, song):
+        return {
+            'artist': self.artists,
+            'duration_str': self.set_duration_str(song),
+        }
+
     def get_items(self):
         return {
             'type': self.type,
@@ -148,5 +158,31 @@ class Album(Songs):
             'title': self.title,
             'thumbnail': self.thumbnail,
             'artists': self.artists,
+            'year': self.year,
+            'list_items': self.list_items
+        }
+
+class Playlist(Songs):
+    def __init__(self, search_data):
+        import json
+        self.type = 'playlist'
+        self.has_main = True
+        self.title = search_data['title']
+        self.thumbnail = search_data['thumbnails'][-1]['url']
+        self.duration_str = search_data['duration']
+        self.track_count = search_data['trackCount']
+        self.list_items = []
+        for playlist in search_data['tracks']:
+            playlist = self.create_item(playlist)
+            self.list_items.append(playlist)
+
+    def get_items(self):
+        return {
+            'type': self.type,
+            'has_main': self.has_main,
+            'title': self.title,
+            'thumbnail': self.thumbnail,
+            'duration_str': self.duration_str,
+            'track_count': self.track_count,
             'list_items': self.list_items
         }

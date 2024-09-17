@@ -1,3 +1,15 @@
+{% if search.has_main %}
+<div class="p-2 w-full flex items-center flex-col">
+    <h1>{{search.title}}</h1>
+    <h2>{% for artist in search.artists %}{{ artist }}{% if not loop.last %}, {% endif %}{% endfor %}</h2>
+    <h2>{{search.year}}</h2>
+    <h2>{{search.duration_str}}</h2>
+    {% if search.track_count %}
+        <h2>{{search.track_count}} tracks</h2>
+    {% endif %}
+</div>
+{% endif %}
+
 {% for song in search.list_items %}
     <div class="song ripple-container p-2 h-20 w-full flex items-center border-b-[1px] border-[rgba(255,255,255,.1)]" oncontextmenu='more_options(event, "{{ song.videoId }}", "{{ search.type }}")'>
         <div hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="relative mr-4 size-12 min-w-[48px] md:min-w-[60px] md:h-[60px] md:w-[60px] cursor-pointer">
