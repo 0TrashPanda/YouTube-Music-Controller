@@ -50,7 +50,7 @@ class Songs():
         return song['videoId']
 
     def set_duration_str(self, song):
-        return song['duration']
+        return song.get('duration', None)
 
     def set_duration_sec(self, song):
         return song.get('duration_seconds', None)
@@ -184,5 +184,36 @@ class Playlist(Songs):
             'thumbnail': self.thumbnail,
             'duration_str': self.duration_str,
             'track_count': self.track_count,
+            'list_items': self.list_items
+        }
+
+class Playlists(Songs):
+    def __init__(self, search_data):
+        self.type = 'playlists'
+        self.has_main = False
+        self.list_items = []
+        for playlist in search_data:
+            playlist = self.create_item(playlist)
+            self.list_items.append(playlist)
+
+    def set_artist(self, song):
+        return song['author']
+
+    def set_videoId(self, song):
+        return song['browseId']
+
+    def set_type(self, song):
+        return 'playlist'
+
+    def set_secondary(self, song):
+        return {
+            'artist': self.set_artist(song),
+            'view_count': str(song.get('itemCount', None)) + ' views'
+        }
+
+    def get_items(self):
+        return {
+            'type': self.type,
+            'has_main': self.has_main,
             'list_items': self.list_items
         }

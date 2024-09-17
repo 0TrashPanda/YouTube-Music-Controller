@@ -11,7 +11,7 @@ ytmusic = YTMusic()
 app = Flask(__name__)
 socketio = SocketIO(app)
 from src.classes import Player, Song
-from src.search_builder import Album, Albums, Playlist, Songs, Radio
+from src.search_builder import Album, Albums, Playlist, Playlists, Songs, Radio
 
 @socketio.on('connect')
 def handle_connect():
@@ -147,7 +147,7 @@ def search():
         return render_template('search.html', search=Radio(radio).get_items())
     jsons = ytmusic.search(search_query, filter=filter)
     if filter == 'playlists':
-        return render_template('playlists.html', playlists=jsons)
+        return render_template('search.html', search=Playlists(jsons).get_items())
     if filter == 'artists':
         return render_template('artists.html', artists=jsons)
     if filter == 'albums':
@@ -166,6 +166,16 @@ def search_suggestions():
 def play_next():
     song_data = request.form.get('song')
     json_song_data = json.loads(song_data)
+    if json_song_data.get('type') == 'playlist':
+        playlist = ytmusic.get_playlist(json_song_data['videoId'])
+        socketio.emit('alert', f'Added playlist to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        for song in playlist.get('tracks', []):
+            s = create_song(song)
+            player.queue.add_song_at_end(s)
+            socketio.emit('update_queue', player.queue.get_queues())
+        if player.get_play_state() == 'Ended':
+            player.play_queue()
+        return 'OK', 200
     if json_song_data.get('type') == 'Album':
         album = ytmusic.get_album(json_song_data['videoId'])
         socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
@@ -189,6 +199,16 @@ def play_next():
 def add_to_queue():
     song_data = request.form.get('song')
     json_song_data = json.loads(song_data)
+    if json_song_data.get('type') == 'playlist':
+        playlist = ytmusic.get_playlist(json_song_data['videoId'])
+        socketio.emit('alert', f'Added playlist to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        for song in playlist.get('tracks', []):
+            s = create_song(song)
+            player.queue.add_song_at_end(s)
+            socketio.emit('update_queue', player.queue.get_queues())
+        if player.get_play_state() == 'Ended':
+            player.play_queue()
+        return 'OK', 200
     if json_song_data.get('type') == 'Album':
         album = ytmusic.get_album(json_song_data['videoId'])
         socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
@@ -251,6 +271,13 @@ def open_album():
     album = ytmusic.get_album(browseId)
     album = Album(album)
     return render_template('search.html', search=album.get_items())
+
+@app.route('/open_playlist', methods=['POST'])
+def open_playlist():
+    browseId = request.form.get('browseId')
+    playlist = ytmusic.get_playlist(browseId)
+    playlist = Playlist(playlist)
+    return render_template('search.html', search=playlist.get_items())
 
 @app.route('/clear_queue', methods=['POST'])
 def clear_queue():

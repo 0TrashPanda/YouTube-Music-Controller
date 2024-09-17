@@ -31,34 +31,38 @@ class Song:
             'youtube_include_dash_manifest': False,  # Skip DASH manifest to avoid extra downloads
         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(self.video_url, download=False)
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(self.video_url, download=False)
 
-            # get the thumbnail with the highest resolution that is square
-            # todo: make this better
-            thumbnails = info_dict.get('thumbnails', [{}])
-            thumbnail = thumbnails[0]
-            for thumb in thumbnails:
-                resolution = thumb.get('resolution', None)
-                if not resolution:
+                # get the thumbnail with the highest resolution that is square
+                # todo: make this better
+                thumbnails = info_dict.get('thumbnails', [{}])
+                thumbnail = thumbnails[0]
+                for thumb in thumbnails:
+                    resolution = thumb.get('resolution', None)
+                    if not resolution:
+                        break
+                    if resolution.split('x')[0] == resolution.split('x')[1]:
+                        thumbnail = thumb
+                        continue
                     break
-                if resolution.split('x')[0] == resolution.split('x')[1]:
-                    thumbnail = thumb
-                    continue
-                break
-            thumbnail_url = thumbnail.get('url', None)
+                thumbnail_url = thumbnail.get('url', None)
 
-            try:
-                stream_url = [f for f in info_dict['formats'] if f.get('audio_channels')][0]['url']
-            except IndexError:
-                print('No stream URL found')
-                import json
-                print(json.dumps(info_dict['formats'], indent=4))
-                stream_url = None
+                try:
+                    stream_url = [f for f in info_dict['formats'] if f.get('audio_channels')][0]['url']
+                except IndexError:
+                    print('No stream URL found')
+                    import json
+                    print(json.dumps(info_dict['formats'], indent=4))
+                    stream_url = None
 
-            self.stream_url = stream_url
-            self.release_year = info_dict['release_year']
-            self.thumbnail = thumbnail_url
+                self.stream_url = stream_url
+                self.release_year = info_dict['release_year']
+                self.thumbnail = thumbnail_url
+        except yt_dlp.utils.DownloadError:
+            print('Failed to get stream URL')
+            self.stream_url = ''
 
     def toJSON(self):
         return {
