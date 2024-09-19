@@ -164,7 +164,6 @@ class Album(Songs):
 
 class Playlist(Songs):
     def __init__(self, search_data):
-        import json
         self.type = 'playlist'
         self.has_main = True
         self.title = search_data['title']
@@ -210,6 +209,49 @@ class Playlists(Songs):
             'artist': self.set_artist(song),
             'view_count': str(song.get('itemCount', None)) + ' views'
         }
+
+    def get_items(self):
+        return {
+            'type': self.type,
+            'has_main': self.has_main,
+            'list_items': self.list_items
+        }
+
+class Artists(Songs):
+    def __init__(self, search_data):
+        self.type = 'artists'
+        self.has_main = False
+        self.list_items = []
+        for artist in search_data:
+            artist = self.create_item(artist)
+            self.list_items.append(artist)
+
+    def set_title(self, song):
+        return song['artist']
+
+    def set_album(self, song):
+        return 'no album'
+
+    def set_artist(self, song):
+        return 'no artist'
+
+    def set_videoId(self, song):
+        return song['browseId']
+
+    def set_duration_str(self, song):
+        return 'no duration'
+
+    def set_duration_sec(self, song):
+        return 'no duration'
+
+    def set_year(self, song):
+        return 'no year'
+
+    def set_type(self, song):
+        return 'artist'
+
+    def set_secondary(self, song):
+        return {}
 
     def get_items(self):
         return {

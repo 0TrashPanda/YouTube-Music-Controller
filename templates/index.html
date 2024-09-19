@@ -115,6 +115,10 @@
         console.log('Disconnected from WebSocket server');
     });
 
+    socket.on('search_suggestions', function(data) {
+        processSearchSugestions(data);
+    });
+
     socket.on('update_queue', function(data) {
         var queue = document.querySelector('#queue'); // Get the song container element
         var radio_queue = document.querySelector('#radio_queue');

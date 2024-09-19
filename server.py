@@ -11,7 +11,7 @@ ytmusic = YTMusic()
 app = Flask(__name__)
 socketio = SocketIO(app)
 from src.classes import Player, Song
-from src.search_builder import Album, Albums, Playlist, Playlists, Songs, Radio
+from src.search_builder import Album, Albums, Artists, Playlist, Playlists, Songs, Radio
 
 @socketio.on('connect')
 def handle_connect():
@@ -45,6 +45,15 @@ def handle_reorder(data):
 def handle_seek(pos):
     player.player.set_position(float(pos))
     socketio.emit('current_time', player.get_time())
+
+@socketio.on('search_suggestions')
+def search_suggestions(r):
+    search_query = r.get('q', '')
+    search_query = search_query.strip()
+    if search_query == "":
+        socketio.emit('search_suggestions', [])
+    jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
+    socketio.emit('search_suggestions', jsons)
 
 player = Player()
 
@@ -149,18 +158,10 @@ def search():
     if filter == 'playlists':
         return render_template('search.html', search=Playlists(jsons).get_items())
     if filter == 'artists':
-        return render_template('artists.html', artists=jsons)
+        return render_template('search.html', search=Artists(jsons).get_items())
     if filter == 'albums':
         return render_template('search.html', search=Albums(jsons).get_items())
     return render_template('search.html', search=Songs(jsons).get_items())
-
-@app.route('/search_suggestions')
-def search_suggestions():
-    search_query = request.args.get('q', '').strip()
-    if search_query == "":
-        return '', 204
-    jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
-    return jsonify(jsons)
 
 @app.route('/play_next', methods=['POST'])
 def play_next():
