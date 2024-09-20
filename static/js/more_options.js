@@ -372,11 +372,9 @@ function Search_album(uuid) {
 
 function search_album_artist(uuid) {
     let song = get_song(uuid);
-    console.log(song);
     if (song === undefined) {
         song = document.getElementById(`search-song-${uuid}`).value;
         song = JSON.parse(song);
-        console.log(song);
     }
     search(`b/${song.title}`);
 }
@@ -418,7 +416,6 @@ function open_album(uuid) {
             return response.text();
         })
         .then(html => {
-            console.log(html);
             song_container.innerHTML = html;
             htmx.process(song_container);
         });
@@ -441,7 +438,6 @@ function open_playlist(uuid) {
             return response.text();
         })
         .then(html => {
-            console.log(html);
             song_container.innerHTML = html;
             htmx.process(song_container);
         });
@@ -464,7 +460,6 @@ function open_artist(uuid) {
             return response.text();
         })
         .then(html => {
-            console.log(html);
             song_container.innerHTML = html;
             htmx.process(song_container);
         });
@@ -474,14 +469,13 @@ function yeet_queue(uuid) {
     let song_div = document.querySelector(`input[value='${uuid}']`);
     let queue = song_div.parentElement.parentElement.id;
     let isRadio = queue === 'radio_queue';
-    console.log(isRadio);
     fetch('/clear_queue', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-            'isRadio': json.stringify(isRadio)
+            'isRadio': JSON.stringify(isRadio)
         })
     })
 }

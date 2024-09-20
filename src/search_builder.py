@@ -91,7 +91,7 @@ class Radio(Songs):
         return song['length']
 
     def set_duration_sec(self, song):
-        timeStrToSec(song['length'])
+        return timeStrToSec(song['length'])
 
 def timeStrToSec(timeStr):
     timeStr = timeStr.split(':')
