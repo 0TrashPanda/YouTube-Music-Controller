@@ -108,7 +108,6 @@ def create_song(song_data):
         else:
             album = song_data.get('album', '')
 
-
     if song_data.get('thumbnail'):
         thumbnail = [song_data['thumbnail']]
     elif song_data['thumbnails'] == None:
@@ -200,6 +199,18 @@ def play_next():
 def add_to_queue():
     song_data = request.form.get('song')
     json_song_data = json.loads(song_data)
+    if json_song_data.get('type') == 'artist':
+        artist = ytmusic.get_artist(json_song_data['videoId'])
+        songs = ytmusic.get_playlist(artist['songs']['browseId'])
+        socketio.emit('alert', f'Added all songs from {json_song_data["title"]} to queue')
+        player.queue.radio_queue = []
+        for song in songs.get('tracks', []):
+            s = create_song(song)
+            player.queue.add_song_at_end(s, radio=True)
+            socketio.emit('update_queue', player.queue.get_queues())
+        if player.get_play_state() == 'Ended':
+            player.play_queue()
+        return 'OK', 200
     if json_song_data.get('type') == 'playlist':
         playlist = ytmusic.get_playlist(json_song_data['videoId'])
         socketio.emit('alert', f'Added playlist to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
@@ -278,6 +289,16 @@ def open_playlist():
     browseId = request.form.get('browseId')
     playlist = ytmusic.get_playlist(browseId)
     playlist = Playlist(playlist)
+    return render_template('search.html', search=playlist.get_items())
+
+@app.route('/open_artist', methods=['POST'])
+def open_artist():
+    browseId = request.form.get('browseId')
+    artist = ytmusic.get_artist(browseId)
+    songs = ytmusic.get_playlist(artist['songs']['browseId'])
+    import pyperclip
+    pyperclip.copy(json.dumps(songs, indent=4))
+    playlist = Playlist(songs)
     return render_template('search.html', search=playlist.get_items())
 
 @app.route('/clear_queue', methods=['POST'])

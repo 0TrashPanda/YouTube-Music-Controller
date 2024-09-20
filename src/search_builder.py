@@ -167,7 +167,7 @@ class Playlist(Songs):
         self.type = 'playlist'
         self.has_main = True
         self.title = search_data['title']
-        self.thumbnail = search_data['thumbnails'][-1]['url']
+        self.thumbnail = search_data.get('thumbnails', [{}])[-1].get('url', None)
         self.duration_str = search_data['duration']
         self.track_count = search_data['trackCount']
         self.list_items = []
