@@ -19,7 +19,7 @@ class Song:
         self.release_year = None
         self.duration_str = duration_str
         self.stream_url = None
-        threading.Thread(target=self.gen_data, daemon=True).start() # TODO kill all threads on new radio
+        self.thead = threading.Thread(target=self.gen_data).start() # TODO kill all threads on new radio
 
     def gen_data(self):
         ydl_opts = {
@@ -202,8 +202,14 @@ class Queue:
     def get_radio_queue(self):
         return [song.toJSON() for song in self.radio_queue]
 
-    def clear_queue(self):
-        self.queue.clear()
+    def clear_queue(self, radio=False):
+        print(radio)
+        if radio is True:
+            self.radio_queue.clear()
+            print('cleared radio')
+        else:
+            self.queue.clear()
+            print('cleared queue')
 
     def get_current_song(self):
         if self.queue:

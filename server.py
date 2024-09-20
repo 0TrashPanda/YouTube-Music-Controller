@@ -303,7 +303,9 @@ def open_artist():
 
 @app.route('/clear_queue', methods=['POST'])
 def clear_queue():
-    player.queue.clear_queue()
+    isRadio = request.form.get('isRadio')
+    isRadio = json.loads(isRadio)
+    player.queue.clear_queue(radio=isRadio)
     socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
