@@ -19,9 +19,11 @@ class Song:
         self.release_year = None
         self.duration_str = duration_str
         self.stream_url = None
-        self.thead = threading.Thread(target=self.gen_data).start() # TODO kill all threads on new radio
+        self.thread = threading.Thread(target=self.gen_data) # TODO kill all threads on new radio
+        self.thread_status = 0;
 
     def gen_data(self):
+        self.thread_status = 1
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]',  # Get the best audio only format (e.g., m4a)
             'quiet': True,                   # Suppress output
@@ -63,6 +65,7 @@ class Song:
         except yt_dlp.utils.DownloadError:
             print('Failed to get stream URL')
             self.stream_url = ''
+        self.thread_status = 2
 
     def toJSON(self):
         return {
@@ -81,9 +84,16 @@ class Song:
         return id(self)
 
     def get_stream_url(self):
-        while not self.stream_url:
+        if self.thread_status == 0:
+            self.thread.start()
+        while self.thread_status != 2:
             time.sleep(0.1)
         return self.stream_url
+
+    def start_thread(self):
+        if self.thread_status == 0:
+            print('Starting thread ' + self.title)
+            self.thread.start()
 
 class Player:
     def __init__(self):
@@ -168,11 +178,15 @@ class Queue:
     def add_song_at_end(self, song, radio=False):
         if radio:
             self.radio_queue.append(song)
+            if len(self.radio_queue) < 5:
+                song.start_thread()
             return
         self.queue.append(song)
+        song.start_thread()
 
     def add_song_after_current(self, song, offset=0):
         self.queue.insert(self.get_current_index() + 1 + offset, song)
+        song.start_thread()
 
     def remove_song(self, uuid):
         for index, song in enumerate(self.queue):
@@ -184,6 +198,7 @@ class Queue:
                 self.remove_song_at_index(index, radio=True)
                 break
         socketio.emit('update_queue', self.get_queues())
+        self.start_threads()
 
     def remove_song_at_index(self, index, radio=False):
         current_song_index = self.get_current_index()
@@ -229,6 +244,7 @@ class Queue:
             self.add_song_at_end(self.radio_queue.pop(0))
             self.set_current_song(len(self.queue) - 1)
             socketio.emit('update_queue', self.get_queues())
+            self.start_threads()
             return
         self.set_current_song(0)
 
@@ -271,6 +287,7 @@ class Queue:
                 from server import player
                 player.play_queue()
                 socketio.emit('update_queue', self.get_queues())
+                self.start_threads()
                 break
 
     def reorder(self, uuid_list):
@@ -285,6 +302,7 @@ class Queue:
         self.queue = [uuid_map_queue.pop(uuid) if uuid_map_queue.get(uuid) else uuid_map_radio.pop(uuid) for uuid in rm_dupes(queue) if uuid_map_queue.get(uuid) or uuid_map_radio.get(uuid)] + [song for song in uuid_map_queue.values() if str(song.get_id()) not in radio_queue]
         self.radio_queue = [uuid_map_radio.pop(uuid) if uuid_map_radio.get(uuid) else uuid_map_queue.pop(uuid) for uuid in rm_dupes(radio_queue) if uuid_map_queue.get(uuid) or uuid_map_radio.get(uuid)] + list(uuid_map_radio.values())
 
+        self.start_threads()
 
 
     def get_current_index(self):
@@ -298,3 +316,9 @@ class Queue:
             'queue': self.get_queue(),
             'radio_queue': self.get_radio_queue()
         }
+
+    def start_threads(self):
+        for song in self.queue:
+            song.start_thread()
+        for song in self.radio_queue[:5]:
+            song.start_thread()
