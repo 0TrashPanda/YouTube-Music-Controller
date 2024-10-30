@@ -1,9 +1,6 @@
-import time
 from flask_socketio import SocketIO
 from flask import jsonify, Flask, render_template, request, json
-import socketio
 from ytmusicapi import YTMusic
-import threading
 
 
 ytmusic = YTMusic()
@@ -60,14 +57,6 @@ def search_suggestions(r):
 player = Player()
 
 video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
-
-def vlc_monitor():
-    while True:
-        if player.song_end:
-            player.queue.next_song()
-            player.play_queue()
-            player.song_end = False
-        time.sleep(0.2)
 
 def spit_filter(search_query):
     spit = search_query.split('/')
@@ -298,8 +287,6 @@ def open_artist():
     browseId = request.form.get('browseId')
     artist = ytmusic.get_artist(browseId)
     songs = ytmusic.get_playlist(artist['songs']['browseId'])
-    import pyperclip
-    pyperclip.copy(json.dumps(songs, indent=4))
     playlist = Playlist(songs)
     return render_template('search.html', search=playlist.get_items())
 
@@ -326,10 +313,6 @@ def play_all():
             player.play_queue()
         socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
-
-# Start the VLC monitor in a separate thread
-vlc_thread = threading.Thread(target=vlc_monitor, daemon=True)
-vlc_thread.start()
 
 if __name__ == '__main__':
     app.run(port=5000, host='0.0.0.0')

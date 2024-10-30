@@ -4,6 +4,7 @@ import vlc
 from ytmusicapi import YTMusic
 from server import socketio
 import threading
+from vlc import EventType
 
 ytmusic = YTMusic()
 
@@ -98,14 +99,19 @@ class Song:
 class Player:
     def __init__(self):
         self.instance = vlc.Instance()
-        self.instance.log_unset() # stop vlc from printing to console
         self.player = self.instance.media_player_new()
-        self.media = None
         self.queue = Queue()
-        event_manager = self.player.event_manager()
-        event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
-        self.song_end = False
-        self.player.audio_set_volume(50)
+        # Add event manager setup
+        self.event_manager = self.player.event_manager()
+        # Use a lambda to avoid potential deadlocks
+        self.event_manager.event_attach(EventType.MediaPlayerEndReached,
+        lambda x: threading.Thread(target=self._on_media_end, args=(x,)).start())
+
+    def _on_media_end(self, event):
+        """Handler for media end event"""
+        # Run the next song logic in a separate thread to avoid VLC event handler deadlock
+        self.queue.next_song()
+        self.play_queue()
 
     def get_time(self):
         return self.player.get_time()
@@ -132,8 +138,8 @@ class Player:
 
     def play_song(self, song):
         self.current_song = song
-        self.media = self.instance.media_new(self.queue.get_current_song().get_stream_url())
-        self.player.set_media(self.instance.media_new(self.queue.get_current_song().get_stream_url()))
+        media = self.instance.media_new(song.get_stream_url())
+        self.player.set_media(media)
         self.player.play()
 
 
@@ -155,9 +161,6 @@ class Player:
             return 'Paused'
         else:
             return 'Ended'
-
-    def on_song_end(self, event):
-        self.song_end = True
 
     def get_current_song(self):
         song = self.queue.get_current_song()
