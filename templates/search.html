@@ -13,7 +13,7 @@
 {% for song in search.list_items %}
     <div class="song ripple-container p-2 h-20 w-full flex items-center border-b-[1px] border-[rgba(255,255,255,.1)]" oncontextmenu='more_options(event, "{{ song.videoId }}", "{{ search.type }}")'>
         <div hx-post="/add_to_queue" hx-vals='{"song": {{ song | tojson | safe }} }' hx-swap="none" class="relative mr-4 size-12 min-w-[48px] md:min-w-[60px] md:h-[60px] md:w-[60px] cursor-pointer">
-            <img class="thumbnail object-cover transition duration-300" src="{{ song.thumbnail }}" alt="{{ song.title }}">
+            <img class="thumbnail object-cover transition duration-300" src="{{ song.thumbnail }}" alt="{{ song.title }}" loading="lazy">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon size-8 absolute inset-0 m-auto text-white opacity-0 transition-opacity duration-300">
                 <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
             </svg>

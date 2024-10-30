@@ -255,7 +255,7 @@
         <div id="queue_item" class="song lg:cursor-move ripple-container p-2 border-b-[1px] h-20 flex items-center border-[rgba(255,255,255,.1)]" draggable="true" oncontextmenu="more_options(event, ${song.uuid}, 'queue')">
             <!-- <img class="mr-4 ml-2 sm:ml-0 h-12 w-12 min-w-12 md:min-w-[60px] md:h-[60px]" src="${song.thumbnail}" alt="${song.title}"> -->
             <div hx-post="/jump_queue" hx-include="next input" hx-swap="none" class="relative mr-4 size-12 min-w-[48px] md:min-w-[60px] md:h-[60px] md:w-[60px] cursor-pointer">
-                <img class="thumbnail object-cover transition duration-300" src="${song.thumbnail}" alt="${song.title}">
+                <img class="thumbnail object-cover transition duration-300" src="${song.thumbnail}" alt="${song.title}" loading="lazy">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="play-icon size-8 absolute inset-0 m-auto text-white opacity-0 transition-opacity duration-300">
                     <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
                 </svg>
