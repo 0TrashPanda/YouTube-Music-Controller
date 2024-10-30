@@ -221,7 +221,7 @@ def add_to_queue():
         for song in songs.get('tracks', []):
             s = create_song(song)
             player.queue.add_song_at_end(s, radio=True)
-            socketio.emit('update_queue', player.queue.get_queues())
+        socketio.emit('update_queue', player.queue.get_queues())
         if player.get_play_state() == 'Ended':
             player.play_queue()
         return 'OK', 200
