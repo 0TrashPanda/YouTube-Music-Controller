@@ -48,12 +48,14 @@ def handle_seek(pos):
 
 @socketio.on('search_suggestions')
 def search_suggestions(r):
-    search_query = r.get('q', '')
-    search_query = search_query.strip()
+    search_query = r.get('q', '').strip()
+    sid = request.sid
     if search_query == "":
-        socketio.emit('search_suggestions', [])
-    jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
-    socketio.emit('search_suggestions', jsons)
+        socketio.emit('search_suggestions', [], room=sid)
+    else:
+        jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
+        socketio.emit('search_suggestions', jsons, room=sid)
+
 
 player = Player()
 
