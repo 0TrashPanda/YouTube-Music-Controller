@@ -92,7 +92,10 @@ class Queue:
 
     def set_radio(self, radio):
         self.radio_queue = []
+        song_titles = [song.title for song in self.queue]
         for index, song_data in enumerate(radio['tracks']):
+            if song_data['title'] in song_titles:
+                continue
             videoId = song_data['videoId']
             video_url = f'https://music.youtube.com/watch?v={videoId}'
             artists = [artist['name'] for artist in song_data['artists']]
