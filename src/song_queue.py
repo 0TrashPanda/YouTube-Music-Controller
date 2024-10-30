@@ -107,8 +107,7 @@ class Queue:
                 from server import player
                 if player.get_play_state() == 'Ended':
                     player.queue.next_song()
-            if index % 5 == 0:
-                socketio.emit('update_queue', self.get_queues())
+        socketio.emit('update_queue', self.get_queues())
 
     def jump_queue(self, uuid):
         for song in self.queue:
