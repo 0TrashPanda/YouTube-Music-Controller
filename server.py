@@ -191,8 +191,8 @@ def play_next():
         for song in playlist.get('tracks', []):
             s = create_song(song)
             player.queue.add_song_at_end(s)
-            socketio.emit('update_queue', player.queue.get_queues())
 
+        socketio.emit('update_queue', player.queue.get_queues())
         if player.get_play_state() == 'Ended':
             player.play_queue()
         return 'OK', 200
@@ -207,8 +207,8 @@ def play_next():
             song['thumbnail'] = song_data['thumbnail']
             s = create_song(song)
             player.queue.add_song_at_end(s)
-            socketio.emit('update_queue', player.queue.get_queues())
 
+        socketio.emit('update_queue', player.queue.get_queues())
         if player.get_play_state() == 'Ended':
             player.play_queue()
         return 'OK', 200

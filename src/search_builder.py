@@ -252,7 +252,6 @@ class Artists(Songs):
 
     def set_secondary(self, song):
         return {}
-
     def get_items(self):
         return {
             'type': self.type,
