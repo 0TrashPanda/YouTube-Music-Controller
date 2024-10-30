@@ -1,14 +1,14 @@
-from flask_socketio import SocketIO
-from flask import jsonify, Flask, render_template, request, json
+from src.search_builder import Album, Albums, Artists, Playlist, Playlists, Songs, Radio
+from src.song import Song
+from src.player import Player
+from src.socket_client import app, socketio
+from flask import jsonify, render_template, request, json
 from ytmusicapi import YTMusic
+from src.song_queue import Queue
 
 
 ytmusic = YTMusic()
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-from src.classes import Player, Song
-from src.search_builder import Album, Albums, Artists, Playlist, Playlists, Songs, Radio
 
 @socketio.on('connect')
 def handle_connect():
@@ -21,9 +21,11 @@ def handle_connect():
     socketio.emit('current_time', player.get_time())
     socketio.emit('volume', player.player.audio_get_volume())
 
+
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
+
 
 @socketio.on('volume')
 def handle_volume(volume):
@@ -33,15 +35,18 @@ def handle_volume(volume):
         return
     socketio.emit('volume', volume)
 
+
 @socketio.on('reorder')
 def handle_reorder(data):
     player.queue.reorder(data)
     socketio.emit('update_queue', player.queue.get_queues())
 
+
 @socketio.on('seek')
 def handle_seek(pos):
     player.player.set_position(float(pos))
     socketio.emit('current_time', player.get_time())
+
 
 @socketio.on('search_suggestions')
 def search_suggestions(r):
@@ -50,13 +55,15 @@ def search_suggestions(r):
     if search_query == "":
         socketio.emit('search_suggestions', [], room=sid)
     else:
-        jsons = ytmusic.get_search_suggestions(search_query, detailed_runs=True)
+        jsons = ytmusic.get_search_suggestions(
+            search_query, detailed_runs=True)
         socketio.emit('search_suggestions', jsons, room=sid)
 
 
 player = Player()
 
 video_url = "https://music.youtube.com/watch?v=fQ-UDFguLO0"
+
 
 def spit_filter(search_query):
     spit = search_query.split('/')
@@ -82,14 +89,18 @@ def spit_filter(search_query):
             return {'filter': 'songs', 'search_query': search_query}
     return {'filter': filter, 'search_query': '/'.join(spit[1:])}
 
+
 def create_song(song_data):
     if isinstance(song_data, str):
         song_data = json.loads(song_data)
     videoId = song_data['videoId']
-    duration_str = song_data.get('duration_str', song_data.get('duration', '0:00'))
-    duration_sec = song_data.get('duration_sec', song_data.get('duration_seconds', 0))
+    duration_str = song_data.get(
+        'duration_str', song_data.get('duration', '0:00'))
+    duration_sec = song_data.get(
+        'duration_sec', song_data.get('duration_seconds', 0))
     video_url = f'https://music.youtube.com/watch?v={videoId}'
-    artists = [artist if isinstance(artist, str) else artist['name'] for artist in song_data['artists']]
+    artists = [artist if isinstance(artist, str) else artist['name']
+               for artist in song_data['artists']]
     if song_data.get('secondary'):
         artists = song_data['artists']
         album = song_data['album']
@@ -106,17 +117,21 @@ def create_song(song_data):
     else:
         thumbnail = song_data['thumbnails'][-1]['url']
 
-    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration_str=duration_str, videoId=song_data['videoId'], thumbnail=thumbnail, duration_sec=duration_sec, album=album)
+    song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration_str=duration_str,
+                videoId=song_data['videoId'], thumbnail=thumbnail, duration_sec=duration_sec, album=album)
     return song
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
 @app.route('/play', methods=['POST'])
 def play():
     player.play_queue()
     return 'OK', 200
+
 
 @app.route('/get_time', methods=['GET'])
 def get_time():
@@ -124,11 +139,13 @@ def get_time():
         return jsonify({'current_time': 0, 'total_time': 0})
     return jsonify({'current_time': player.get_time() // 1000, 'total_time': player.get_length() // 1000})
 
+
 @app.route('/play_pause', methods=['POST'])
 def play_pause():
     player.play_pause()
     socketio.emit('current_time', player.get_time())
     return 'OK', 200
+
 
 @app.route('/search', methods=['POST'])
 def search():
@@ -153,13 +170,15 @@ def search():
         return render_template('search.html', search=Albums(jsons).get_items())
     return render_template('search.html', search=Songs(jsons).get_items())
 
+
 @app.route('/play_next', methods=['POST'])
 def play_next():
     song_data = request.form.get('song')
     json_song_data = json.loads(song_data)
     if json_song_data.get('type') == 'playlist':
         playlist = ytmusic.get_playlist(json_song_data['videoId'])
-        socketio.emit('alert', f'Added playlist to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        socketio.emit('alert', f'Added playlist to queue: {
+                      json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
         for song in playlist.get('tracks', []):
             s = create_song(song)
             player.queue.add_song_at_end(s)
@@ -169,7 +188,8 @@ def play_next():
         return 'OK', 200
     if json_song_data.get('type') == 'Album':
         album = ytmusic.get_album(json_song_data['videoId'])
-        socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {
+                      ", ".join(json_song_data["artists"])}')
         for song in album.get('tracks', []):
             song['thumbnail'] = json_song_data['thumbnail']
             s = create_song(song)
@@ -182,9 +202,11 @@ def play_next():
     player.queue.add_song_after_current(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
-    socketio.emit('alert', f'Playing next: {song.title} by {", ".join(song.artists)}')
+    socketio.emit('alert', f'Playing next: {
+                  song.title} by {", ".join(song.artists)}')
     socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
+
 
 @app.route('/add_to_queue', methods=['POST'])
 def add_to_queue():
@@ -193,7 +215,8 @@ def add_to_queue():
     if json_song_data.get('type') == 'artist':
         artist = ytmusic.get_artist(json_song_data['videoId'])
         songs = ytmusic.get_playlist(artist['songs']['browseId'])
-        socketio.emit('alert', f'Added all songs from {json_song_data["title"]} to queue')
+        socketio.emit('alert', f'Added all songs from {
+                      json_song_data["title"]} to queue')
         player.queue.radio_queue = []
         for song in songs.get('tracks', []):
             s = create_song(song)
@@ -204,7 +227,8 @@ def add_to_queue():
         return 'OK', 200
     if json_song_data.get('type') == 'playlist':
         playlist = ytmusic.get_playlist(json_song_data['videoId'])
-        socketio.emit('alert', f'Added playlist to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        socketio.emit('alert', f'Added playlist to queue: {
+                      json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
         for song in playlist.get('tracks', []):
             s = create_song(song)
             player.queue.add_song_at_end(s)
@@ -214,7 +238,8 @@ def add_to_queue():
         return 'OK', 200
     if json_song_data.get('type') == 'Album':
         album = ytmusic.get_album(json_song_data['videoId'])
-        socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {", ".join(json_song_data["artists"])}')
+        socketio.emit('alert', f'Added album to queue: {json_song_data["title"]} by {
+                      ", ".join(json_song_data["artists"])}')
         for song in album.get('tracks', []):
             song['thumbnail'] = json_song_data['thumbnail']
             s = create_song(song)
@@ -227,9 +252,11 @@ def add_to_queue():
     player.queue.add_song_at_end(song)
     if player.get_play_state() == 'Ended':
         player.play_queue()
-    socketio.emit('alert', f'Added to queue: {song.title} by {", ".join(song.artists)}')
+    socketio.emit('alert', f'Added to queue: {
+                  song.title} by {", ".join(song.artists)}')
     socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
+
 
 @app.route('/radio', methods=['POST'])
 def radio():
@@ -240,11 +267,13 @@ def radio():
     socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
 
+
 @app.route('/skip', methods=['POST'])
 def skip():
     player.queue.next_song()
     player.play_queue()
     return 'OK', 200
+
 
 @app.route('/back', methods=['POST'])
 def back():
@@ -252,6 +281,7 @@ def back():
         player.queue.previous_song()
     player.play_queue()
     return 'OK', 200
+
 
 @app.route('/remove', methods=['POST'])
 def remove():
@@ -262,11 +292,13 @@ def remove():
         return '', 404
     return 'OK', 200
 
+
 @app.route('/jump_queue', methods=['POST'])
 def jump_queue():
     uuid = request.form.get('uuid')
     player.queue.jump_queue(uuid)
     return 'OK', 200
+
 
 @app.route('/open_album', methods=['POST'])
 def open_album():
@@ -275,12 +307,14 @@ def open_album():
     album = Album(album)
     return render_template('search.html', search=album.get_items())
 
+
 @app.route('/open_playlist', methods=['POST'])
 def open_playlist():
     browseId = request.form.get('browseId')
     playlist = ytmusic.get_playlist(browseId)
     playlist = Playlist(playlist)
     return render_template('search.html', search=playlist.get_items())
+
 
 @app.route('/open_artist', methods=['POST'])
 def open_artist():
@@ -290,6 +324,7 @@ def open_artist():
     playlist = Playlist(songs)
     return render_template('search.html', search=playlist.get_items())
 
+
 @app.route('/clear_queue', methods=['POST'])
 def clear_queue():
     isRadio = request.form.get('isRadio')
@@ -297,6 +332,7 @@ def clear_queue():
     player.queue.clear_queue(radio=isRadio)
     socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
+
 
 @app.route('/play_all', methods=['POST'])
 def play_all():
@@ -306,13 +342,15 @@ def play_all():
         video_url = f'https://music.youtube.com/watch?v={videoId}'
         artists = [artist['name'] for artist in song_data['artists']]
         album_dict = song_data.get('album') or {}
-        album =  album_dict.get('name', 'no album found')
-        song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'], videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=album)
+        album = album_dict.get('name', 'no album found')
+        song = Song(video_url=video_url, title=song_data['title'], artists=artists, duration=song_data['duration_seconds'],
+                    videoId=song_data['videoId'], thumbnail=song_data['thumbnails'][-1]['url'], duration_string=song_data['duration'], album=album)
         player.queue.add_song_at_end(song)
         if index == 0 and player.get_play_state() == 'Ended':
             player.play_queue()
         socketio.emit('update_queue', player.queue.get_queues())
     return 'OK', 200
+
 
 if __name__ == '__main__':
     app.run(port=5000, host='0.0.0.0')
